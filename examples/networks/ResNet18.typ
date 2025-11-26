@@ -1,7 +1,6 @@
 #set page(width: auto, height: auto, margin: 5mm)
 
 #let layers = (
-  // Input
   (
     type: "input",
     height: 8,
