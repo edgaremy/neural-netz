@@ -1,9 +1,11 @@
 # neural-netz
 Visualize Neural Network Architectures in high-quality diagrams in [Typst](https://typst.app), with style and API inspired by [PlotNeuralNet](https://github.com/HarisIqbal88/PlotNeuralNet).
 
-Under the hood, this package only uses the native Typst package [CeTZ](https://typst.app/universe/package/cetz/) for building the diagrams.
+<img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/features/FCN-8(cold).png?raw=true" width="500" align="center">
+<img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/networks/FCN-8.png?raw=true" width="500" align="center">
 
-TODO ADD IMAGE
+
+Under the hood, this package only uses the native Typst package [CeTZ](https://typst.app/universe/package/cetz/) for building the diagrams.
 
 # Usage
 
@@ -71,6 +73,9 @@ Here are a few simple features for getting started.
 ))
 ```
 <img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/features/dimensions-labels.png?raw=true" width="300" align="center">
+
+Additionally, if you network does not fit the page width of your Typst document, you can reduce the scale by giving `scale: 50%` as argument of `draw-network`
+
 
 ### Adding other connexions
 
