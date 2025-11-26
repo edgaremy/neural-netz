@@ -640,7 +640,7 @@ canvas(length: 1cm * scale-factor, {
         l.at("bandfill", default: colors.at("convres-relu"))
       }
       let channels = l.at("channels", default: none)
-      let widths = l.at("widths", default: (64,))
+      let widths = l.at("widths", default: (1,))
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
       let label = l.at("label", default: none)
@@ -657,7 +657,7 @@ canvas(length: 1cm * scale-factor, {
       let channel-labels = if channels != none {
         if has-diagonal-label { channels.slice(0, widths.len()) } else { channels }
       } else {
-        widths.map(w => str(w))
+        (widths.map(w => ""))
       }
       
       // Use actual widths values to determine band sizes
@@ -1319,7 +1319,7 @@ canvas(length: 1cm * scale-factor, {
           draw-connection-path(((from-anchor, waypoint1), (waypoint1, waypoint2), (waypoint2, to-anchor)), opacity: conn-opacity, layers: conn-layers, layer-positions-ref: layer-positions, show-relu: show-relu)
           
           if conn-label != none {
-            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, down-y + 0.2), 
+            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, up-y + 0.2), 
               [#text(size: scaled-font(font-sizes.layer-label), conn-label)])
           }
         }
