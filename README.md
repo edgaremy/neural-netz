@@ -29,7 +29,26 @@ See the examples in the following section to understand how to use it. Alternati
 # Features
 
 # Examples
-Here are a few network architectures implemented with neural-netz:
+Here are a few network architectures implemented with neural-netz (more can be found [in the repo](https://github.com/edgaremy/neural-netz/blob/main/examples/networks)).
+
+### ResNet18
+<img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/networks/ResNet18.png?raw=true" width="400" align="center">
+
+[code for this image](https://github.com/edgaremy/neural-netz/blob/main/examples/networks/ResNet18.typ)
+
+### U-Net
+
+<img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/networks/U-Net.png?raw=true" width="400" align="center">
+
+[code for this image](https://github.com/edgaremy/neural-netz/blob/main/examples/networks/U-Net.typ)
+
+### FCN-8
+
+<img src="https://github.com/edgaremy/neural-netz/blob/main/gallery/networks/FCN-8.png?raw=true" width="400" align="center">
+
+[code for this image](https://github.com/edgaremy/neural-netz/blob/main/examples/networks/FCN-8.typ)
 
 
 # Acknowledgements
+
+This package could not have existed without the great Python+LaTeX visualization package [PlotNeuralNet](https://github.com/HarisIqbal88/PlotNeuralNet) made by Haris Iqbal. It proposes an elegant way for viewing neural networks, and its visual style was obviously a strong inspiration for the implementation of neural-netz.
