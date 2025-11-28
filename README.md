@@ -107,28 +107,25 @@ show-relu: true // visualize relu using darker color on convolution layers
 # Examples
 Here are a few network architectures implemented with neural-netz (more examples can be found [in the repo](examples/networks)).
 
-### ResNet18
+
+<h3 style="text-align: center;">ResNet18</h3>
 <p align="center">
 <img src="gallery/networks/ResNet18.png" alt="ResNet18 visualization" width="500"/>
 </p>
+<p style="text-align: center;"><a href="examples/networks/ResNet18.typ">code for this image</a></p>
 
-[code for this image](examples/networks/ResNet18.typ)
 
-### U-Net
-
+<h3 style="text-align: center;">U-Net</h3>
 <p align="center">
 <img src="gallery/networks/U-Net.png" alt="U-Net visualization" width="500"/>
 </p>
+<p style="text-align: center;"><a href="examples/networks/U-Net.typ">code for this image</a></p>
 
-[code for this image](examples/networks/U-Net.typ)
-
-### FCN-8
-
+<h3 style="text-align: center;">FCN-8</h3>
 <p align="center">
 <img src="gallery/networks/FCN-8.png" alt="FCN-8 visualization" width="500"/>
 </p>
-
-[code for this image](examples/networks/FCN-8.typ)
+<p style="text-align: center;"><a href="examples/networks/FCN-8.typ">code for this image</a></p>
 
 
 # Acknowledgements
