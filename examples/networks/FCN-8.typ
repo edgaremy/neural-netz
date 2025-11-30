@@ -34,5 +34,4 @@
   ))
 ),
 show-relu: true,
-palette: "cold"
 )

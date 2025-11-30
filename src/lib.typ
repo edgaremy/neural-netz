@@ -1064,6 +1064,7 @@ canvas(length: 1cm * scale-factor, {
 
       let dyn-stroke = dynamic-color-strokes(fill-color)
       dyn-stroke.solid.paint = dyn-stroke.solid.paint.darken(20%) // slightly darker stroke than for other layers
+      dyn-stroke.solid.thickness = dyn-stroke.solid.thickness * 1.4
 
       circle((center-x, center-y), radius: radius,
         fill: gradient.radial(
