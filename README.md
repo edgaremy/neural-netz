@@ -16,7 +16,7 @@ Simply import the package in order to call its drawing function:
 ```
 You can then call `draw-network` which has the following arguments:
 ```typ
-draw-network(
+#let draw-network(
   layers,
   connections: (),
   palette: "warm",
