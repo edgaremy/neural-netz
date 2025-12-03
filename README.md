@@ -29,7 +29,7 @@ draw-network(
 ```
 See the examples in the following section to understand how to use it. Alternatively, you can also start from already written architecture examples (see the Examples section).
 
-# Getting started
+## Getting started
 
 Here are a few simple features for getting started.
 
@@ -86,7 +86,7 @@ show-legend: true,
 )
 ```
 <p align="center">
-<img src="gallery/features/dimensions-labels.png" alt="Dimensions and labels example" width="350"/>
+<img src="gallery/features/dimensions-labels.png" alt="Dimensions and labels example" width="450"/>
 </p>
 
 Using `show-legend: true` you can add a smart legend to your visual !
@@ -113,7 +113,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 )
 ```
 <p align="center">
-<img src="gallery/features/connexions.png" alt="Adding connexions example" width="350"/>
+<img src="gallery/features/connexions.png" alt="Adding connexions example" width="450"/>
 </p>
 
 ### Predefined layer types
@@ -164,7 +164,7 @@ show-legend: true
 </p>
 
 
-# Examples
+## Examples
 Here are a few network architectures implemented with neural-netz (more examples can be found [in the repo](https://github.com/edgaremy/neural-netz/tree/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks)).
 
 <h3 style="text-align: center;">ResNet18</h3>
@@ -185,7 +185,7 @@ Here are a few network architectures implemented with neural-netz (more examples
 </p>
 <p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks/FCN-8.typ">code for this image</a></p>
 
-# Cite this work
+## Cite this work
 If you use the neural-netz package for a scientific publication, you can cite it as follows:
 #### APA
 ```
@@ -204,7 +204,7 @@ year = {2025}
 }
 ```
 
-# Acknowledgements
+## Acknowledgements
 
 This package could not have existed without the great Python+LaTeX visualization package [PlotNeuralNet](https://github.com/HarisIqbal88/PlotNeuralNet) made by Haris Iqbal. It proposes an elegant way for viewing neural networks, and its visual style was obviously a strong inspiration for the implementation of neural-netz.
 
