@@ -162,7 +162,7 @@ canvas(length: 1cm * scale-factor, {
   
   let scaled-font = (size) => size * scale-factor
   
-  let box-3d(x, y, w, h, d, fill, opacity: 1, show-left: true, show-right: true, ylabel: none, zlabel: none, is-input: false, image-file: none) = {
+  let box-3d(x, y, w, h, d, fill, opacity: 1, show-left: true, show-right: true, ylabel: none, zlabel: none, is-input: false, image: none) = {
     let (ox, oy) = get-depth-offsets(d)
     let alpha = 100% - opacity * 100%
     
@@ -186,22 +186,37 @@ canvas(length: 1cm * scale-factor, {
     line((x, y + h), (x + ox, y + h + oy), (x + w + ox, y + h + oy), (x + w, y + h),
       close: true, fill: fill.darken(darken-amounts.top).transparentize(alpha), stroke: dyn-strokes.solid)
     
-    if image-file != none {
+    // DRAW IMAGE ON FRONT FACE WITH ISOMETRIC PERSPECTIVE
+    if image != none {
+      // 28.25pt per coord unit on the canva (ajusted manually, maybe there should be an exact formula?)
       let img-height = (h) * 28.25pt * scale-factor
       let img-width = (d) * 28.25pt * scale-factor
-      // skew + scale must result in 45deg angle
-      let scale-value = depth-multiplier * 100%
-      let skew-angle = scale-value * 55.55deg
+
+      let actual-img-width() = measure(image).width
+      let actual-img-height() = measure(image).height
+      let actual-img-ratio() = actual-img-width() / actual-img-height()
 
       content((x+w+ox/2,y+h/2+oy/2),
-      // Image displayed with isometric perspective:
-      pad(x: -img-width * depth-multiplier)[ // remove extra left padding left by following scale call
-      #std.scale(x: scale-value)[
-      #std.rotate(90deg)[
-      #std.skew(ax: skew-angle)[
-      #std.rotate(-90deg)[
-      #image(image-file, height: img-height, width: img-width)]
-      ]]]])
+        // Image displayed with isometric perspective:
+        context {
+          // remove extra left padding caused by the skew combined with rotation
+          pad(
+            x: -((1+depth-multiplier) * img-height - img-width)/2,
+            y: +(img-height/2 - img-width)/2
+          )[ 
+          #std.rotate(90deg)[
+          #std.skew(ax: 45deg)[ 
+          #std.rotate(-90deg)[
+          // remove extra padding caused by the scale call (the size with padding matches the original image size)
+          #pad(
+            x: -(actual-img-width() - img-width * depth-multiplier)/2,
+            y: -(actual-img-height() - img-height)/2
+          )[ 
+          #std.scale(x: img-width * depth-multiplier, y: img-height)[ 
+          #image]
+          ]]]]]
+        }
+      )
 
       line((x + w, y), (x + w + ox, y + oy), (x + w + ox, y + h + oy), (x + w, y + h),
       close: true, fill: fill.transparentize(90%), stroke: dyn-strokes.solid)
@@ -637,15 +652,15 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.input)
       let layer-opacity = l.at("opacity", default: 0.9)
       let channels = l.at("channels", default: none)
-      let image-file = l.at("image-file", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      if image-file == "default" {
-        image-file = "bird.jpg"
+      if img == "default" {
+        img = image("bird.jpg")
       }
 
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image-file: image-file)
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels (below and optionally on diagonal)
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
