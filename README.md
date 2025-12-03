@@ -8,7 +8,7 @@ Visualize Neural Network Architectures in high-quality diagrams using [Typst](ht
 
 Under the hood, this package only uses the native Typst package [CeTZ](https://typst.app/universe/package/cetz/) for building the diagrams.
 
-# Usage
+## Usage
 
 Simply import the package in order to call its drawing function:
 ```typ
