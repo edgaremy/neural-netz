@@ -12,7 +12,7 @@ Under the hood, this package only uses the native Typst package [CeTZ](https://t
 
 Simply import the package in order to call its drawing function:
 ```typ
-#import "@preview/neural-netz:0.1.0"
+#import "@preview/neural-netz:0.2.0"
 ```
 You can then call `draw-network` which has the following arguments:
 ```typ
@@ -118,7 +118,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 
 ### Predefined layer types
 
-Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name in the below. Of course, this is just a starting point, you can modify most of there default attributes.
+Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name in the code below. Of course, this is just a starting point, you can modify most of there default attributes.
 <p align="center">
 <img src="gallery/features/predefined-layers.png" alt="Adding connexions example" width="600"/>
 </p>
@@ -189,7 +189,7 @@ Here are a few network architectures implemented with neural-netz (more examples
 If you use the neural-netz package for a scientific publication, you can cite it as follows:
 #### APA
 ```
-Remy, E. (2025). neural-netz, a Typst Package (Version 0.1.0) [Computer software]. https://github.com/edgaremy/neural-netz/
+Remy, E. (2025). neural-netz, a Typst Package (Version 0.2.0) [Computer software]. https://github.com/edgaremy/neural-netz/
 ```
 #### BibTeX
 
@@ -199,7 +199,7 @@ author = {Remy, Edgar},
 month = dec,
 title = {{neural-netz, a Typst Package}},
 url = {https://github.com/edgaremy/neural-netz/},
-version = {0.1.0},
+version = {0.2.0},
 year = {2025}
 }
 ```
