@@ -98,7 +98,7 @@ And if you network does not fit the page width of your Typst document, **you can
 
 ### Adding other connexions
 
-Though the main axis connections will be drawn automatically, you can specify other connexions to draw using the `connexions` argument of `draw-network`:
+Though the main axis connections will be drawn automatically, you can specify other connexions to draw using the `connexions` argument of `draw-network`. In order to make reference to a layer, it will need a `name`:
 
 ```typ
 #draw-network((
@@ -122,7 +122,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 
 ### Predefined layer types
 
-Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name underneath each layer. Of course, this is just a starting point, you can modify most of there default attributes.
+Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name underneath each layer. Of course, this is just a starting point, you can modify most of their default attributes.
 <p align="center">
 <img src="gallery/features/predefined-layers.png" alt="Adding connexions example" width="600"/>
 </p>
