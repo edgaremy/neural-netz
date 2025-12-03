@@ -30,6 +30,8 @@ let colors-warm = (
   convsoftmax: rgb("#6A0066"),
   input: rgb("#f7f1ed"),
   output: rgb("#6A0066"),
+  custom: rgb("#dad9d7"),
+  custom-relu: rgb("#a8a7a4"),
   arrow: rgb("#0f4d52"),
   connection: rgb("#0f4d52"),
 )
@@ -52,6 +54,8 @@ let colors-cold = (
   convsoftmax: rgb("#4A148C"),
   input: rgb("#ecebf5"),
   output: rgb("#4A148C"),
+  custom: rgb("#d7d9da"),
+  custom-relu: rgb("#a1a4ad"),
   arrow: rgb("#0f4d52"),
   connection: rgb("#0f4d52"),
 )
@@ -162,6 +166,34 @@ canvas(length: 1cm * scale-factor, {
   
   let scaled-font = (size) => size * scale-factor
   
+  // Helper function: Draw isometric image on right face
+  let draw-isometric-image(x, y, w, h, ox, oy, image) = {
+    let img-height = (h) * 28.25pt * scale-factor
+    let img-width = (oy / depth-multiplier) * 28.25pt * scale-factor
+
+    let actual-img-width() = measure(image).width
+    let actual-img-height() = measure(image).height
+
+    content((x+w+ox/2,y+h/2+oy/2),
+      context {
+        pad(
+          x: -((1+depth-multiplier) * img-height - img-width)/2,
+          y: +(img-height/2 - img-width)/2
+        )[ 
+        #std.rotate(90deg)[
+        #std.skew(ax: 45deg)[ 
+        #std.rotate(-90deg)[
+        #pad(
+          x: -(actual-img-width() - img-width * depth-multiplier)/2,
+          y: -(actual-img-height() - img-height)/2
+        )[ 
+        #std.scale(x: img-width * depth-multiplier, y: img-height)[ 
+        #image]
+        ]]]]]
+      }
+    )
+  }
+  
   let box-3d(x, y, w, h, d, fill, opacity: 1, show-left: true, show-right: true, ylabel: none, zlabel: none, is-input: false, image: none) = {
     let (ox, oy) = get-depth-offsets(d)
     let alpha = 100% - opacity * 100%
@@ -186,44 +218,13 @@ canvas(length: 1cm * scale-factor, {
     line((x, y + h), (x + ox, y + h + oy), (x + w + ox, y + h + oy), (x + w, y + h),
       close: true, fill: fill.darken(darken-amounts.top).transparentize(alpha), stroke: dyn-strokes.solid)
     
-    // DRAW IMAGE ON FRONT FACE WITH ISOMETRIC PERSPECTIVE
-    if image != none {
-      // 28.25pt per coord unit on the canva (ajusted manually, maybe there should be an exact formula?)
-      let img-height = (h) * 28.25pt * scale-factor
-      let img-width = (d) * 28.25pt * scale-factor
-
-      let actual-img-width() = measure(image).width
-      let actual-img-height() = measure(image).height
-      let actual-img-ratio() = actual-img-width() / actual-img-height()
-
-      content((x+w+ox/2,y+h/2+oy/2),
-        // Image displayed with isometric perspective:
-        context {
-          // remove extra left padding caused by the skew combined with rotation
-          pad(
-            x: -((1+depth-multiplier) * img-height - img-width)/2,
-            y: +(img-height/2 - img-width)/2
-          )[ 
-          #std.rotate(90deg)[
-          #std.skew(ax: 45deg)[ 
-          #std.rotate(-90deg)[
-          // remove extra padding caused by the scale call (the size with padding matches the original image size)
-          #pad(
-            x: -(actual-img-width() - img-width * depth-multiplier)/2,
-            y: -(actual-img-height() - img-height)/2
-          )[ 
-          #std.scale(x: img-width * depth-multiplier, y: img-height)[ 
-          #image]
-          ]]]]]
-        }
-      )
-
-      line((x + w, y), (x + w + ox, y + oy), (x + w + ox, y + h + oy), (x + w, y + h),
-      close: true, fill: fill.transparentize(90%), stroke: dyn-strokes.solid)
-
-    } else {
-      line((x + w, y), (x + w + ox, y + oy), (x + w + ox, y + h + oy), (x + w, y + h),
+    // Draw right face normally
+    line((x + w, y), (x + w + ox, y + oy), (x + w + ox, y + h + oy), (x + w, y + h),
       close: true, fill: fill.darken(darken-amounts.right).transparentize(alpha), stroke: dyn-strokes.solid)
+    
+    // DRAW IMAGE ON TOP OF RIGHT FACE WITH ISOMETRIC PERSPECTIVE
+    if image != none {
+      draw-isometric-image(x, y, w, h, ox, oy, image)
     }
     
     if is-input {
@@ -246,7 +247,7 @@ canvas(length: 1cm * scale-factor, {
       }
     }
   }
-  
+
   // Helper function: Draw front face of a single band with optional relu split
   let draw-band-front-face(band-x, y, band-width, h, fill-color, bandfill-color, alpha, show-relu) = {
     if show-relu {
@@ -578,6 +579,24 @@ canvas(length: 1cm * scale-factor, {
   let used-layer-types = (:)
   let layer-positions = (:)
   let arrow-segments = (:)
+  let legend-entries = (:)  // Collect legend entries: key -> (label, color)
+  
+  // Default legend labels for each layer type
+  let default-legend-labels = (
+    input: "Input",
+    conv: "Convolution",
+    convres: "Conv Residual",
+    pool: "Pooling",
+    unpool: "Unpooling",
+    deconv: "Deconvolution",
+    concat: "Concatenation",
+    sum: "Element-wise Sum",
+    gap: "Global Avg Pool",
+    fc: "Fully Connected",
+    convsoftmax: "Conv Softmax",
+    softmax: "Softmax",
+    output: "Output",
+  )
   
   for (i, l) in layers.enumerate() {
     used-layer-types.insert(l.type, true)
@@ -607,7 +626,10 @@ canvas(length: 1cm * scale-factor, {
         let curr-y-offset = get-y-offset-for-center-on-axis(curr-h, curr-d, arrow-axis-y)
         let end-y = get-perspective-center-y(curr-y-offset, curr-h, curr-oy)
         // Arrow ends at true_west of current layer (depth-adjusted)
-        let end-x = x + curr-ox / 2
+        // For pool/unpool with offset, account for the offset in arrow position
+        let is-curr-pool-or-unpool = l.type == "pool" or l.type == "unpool"
+        let curr-offset = if is-curr-pool-or-unpool { l.at("offset", default: none) } else { none }
+        let end-x = if curr-offset != none { x + curr-offset + curr-ox / 2 } else { x + curr-ox / 2 }
         
         let prev-name = prev-layer.at("name", default: none)
         let curr-name = l.at("name", default: none)
@@ -635,15 +657,223 @@ canvas(length: 1cm * scale-factor, {
           ))
         }
         
-        // Only draw the arrow if target is not pool/unpool
-        if l.type != "pool" and l.type != "unpool" {
+        // Draw arrow for non-pool/unpool layers, or pool/unpool with offset
+        let is-pool-or-unpool = l.type == "pool" or l.type == "unpool"
+        let has-offset = l.at("offset", default: none) != none
+        if not is-pool-or-unpool or has-offset {
           draw-segment-with-arrow(start-x, start-y, end-x, end-y, opacity: 0.7)
         }
       }
     }
     
-    // INPUT IMAGE
-    if l.type == "input" {
+    // CUSTOM LAYER (Universal layer type with full flexibility)
+    if l.type == "custom" {
+      let h = l.at("height", default: 5)
+      let d = l.at("depth", default: 5)
+      let w = l.at("width", default: none)
+      let widths = l.at("widths", default: none)
+      let label = l.at("label", default: none)
+      let xlabel = l.at("xlabel", default: none)
+      let name = l.at("name", default: none)
+      let fill-color = l.at("fill", default: colors.custom)
+      let bandfill-color = l.at("bandfill", default: colors.at("custom-relu"))
+      let layer-opacity = l.at("opacity", default: 0.7)
+      let channels = l.at("channels", default: none)
+      let ylabel-val = l.at("ylabel", default: none)
+      let zlabel-val = l.at("zlabel", default: none)
+      let layer-show-relu = l.at("show-relu", default: show-relu)
+      let img = l.at("image", default: none)
+      let is-input-style = l.at("input-style", default: false)
+      
+      let (ox, oy) = get-depth-offsets(d)
+      let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
+      
+      // Determine rendering mode: simple box or multi-band
+      let use-simple-box = widths == none
+      
+      if use-simple-box {
+        // Simple box rendering (like input, pool, fc, etc.)
+        let actual-w = if w == none { 0.2 } else { w }
+        
+        if img == "default" {
+          img = image("bird.jpg")
+        }
+        
+        box-3d(x, y-offset, actual-w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
+        
+        // Display channels labels
+        draw-channels-labels(channels, x + actual-w/2, x + actual-w, y-offset, ox, oy)
+        
+        // Track position if named
+        if name != none {
+          layer-positions.insert(name, (
+            x: x, y: y-offset, w: actual-w, h: h, ox: ox, oy: oy, type: "custom",
+            anchors: get-layer-anchors(x, y-offset, actual-w, h, ox, oy),
+            pool-offset: 0
+          ))
+        }
+        
+        if label != none {
+          content((x + actual-w/2, y-offset - 0.5), 
+            [#text(size: scaled-font(font-sizes.label), weight: "bold", label)])
+        }
+        
+        prev-x = x + actual-w
+        prev-depth-offset = ox
+        x += actual-w
+        prev-center-y = get-perspective-center-y(y-offset, h, oy)
+        prev-pool-width = 0
+      } else {
+        // Multi-band rendering (like conv, convres)
+        let dyn-strokes = dynamic-color-strokes(fill-color)
+        let dyn-band-strokes = dynamic-color-strokes(bandfill-color)
+        
+        let has-diagonal-label = channels != none and channels.len() == widths.len() + 1
+        let diagonal-label = if has-diagonal-label { channels.at(widths.len()) } else { none }
+        let channel-labels = if channels != none {
+          if has-diagonal-label { channels.slice(0, widths.len()) } else { channels }
+        } else {
+          (widths.map(w => ""))
+        }
+        
+        let start-x = x
+        let total-width = widths.fold(0, (acc, w) => acc + w)
+        
+        // Draw front face as colored bands
+        let cumulative-x = start-x
+        let alpha-front = 100% - layer-opacity * 100%
+        for (j, ch) in channel-labels.enumerate() {
+          let band-width = widths.at(j)
+          let band-x = cumulative-x
+          
+          draw-band-front-face(band-x, y-offset, band-width, h, fill-color, bandfill-color, alpha-front, layer-show-relu)
+          
+          // Display channel label under each band
+          let band-center-x = band-x + band-width / 2
+          content((band-center-x, y-offset - 0.15), 
+            [#text(size: scaled-font(font-sizes.channel-number), str(ch))])
+          
+          cumulative-x += band-width
+        }
+        
+        // Draw front face outer edges
+        line((start-x, y-offset), (start-x, y-offset + h), stroke: dyn-strokes.solid)
+        line((start-x + total-width, y-offset), (start-x + total-width, y-offset + h), stroke: dyn-strokes.solid)
+        line((start-x, y-offset + h), (start-x + total-width, y-offset + h), stroke: dyn-strokes.solid)
+        line((start-x, y-offset), (start-x + total-width, y-offset), stroke: dyn-strokes.solid)
+        
+        // Draw top face segmented by band
+        cumulative-x = start-x
+        for (j, ch) in channel-labels.enumerate() {
+          let band-width = widths.at(j)
+          let band-x = cumulative-x
+          
+          draw-band-top-face(band-x, y-offset, band-width, h, ox, oy, fill-color, bandfill-color, layer-show-relu)
+          
+          cumulative-x += band-width
+        }
+        
+        // Draw right face
+        let right-face-color = if layer-show-relu { bandfill-color } else { fill-color }
+        line((start-x + total-width, y-offset), (start-x + total-width + ox, y-offset + oy),
+          (start-x + total-width + ox, y-offset + h + oy), (start-x + total-width, y-offset + h),
+          close: true,
+          fill: right-face-color.darken(darken-amounts.right).transparentize(opacity-values.right-face),
+          stroke: dyn-strokes.solid)
+        
+        // Draw image on top of right face if provided
+        if img != none {
+          draw-isometric-image(start-x, y-offset, total-width, h, ox, oy, img)
+        }
+        
+        // Draw all edges for band divisions
+        cumulative-x = start-x
+        for (j, ch) in channel-labels.enumerate() {
+          let band-width = widths.at(j)
+          let band-x = cumulative-x
+          
+          draw-band-separator-edges(band-x, y-offset, h, ox, oy, band-width, j == 0, fill-color)
+          
+        cumulative-x += band-width
+      }
+      
+      // Draw outer edges (excluding right face edges which are already drawn)
+      line((start-x, y-offset + h), (start-x + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
+      line((start-x + ox, y-offset + h + oy), (start-x + total-width + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
+      line((start-x + total-width, y-offset + h), (start-x + total-width + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
+      
+      prev-x = start-x + total-width
+        prev-depth-offset = ox
+        x = start-x + total-width
+        let center-x = start-x + total-width / 2
+        
+        // Display label below channel numbers
+        if label != none {
+          content((center-x, y-offset - 0.5), 
+            [#text(size: scaled-font(font-sizes.layer-label), weight: "bold", label)])
+        }
+        
+        // Display xlabel if provided
+        if xlabel != none {
+          content((center-x, y-offset - 0.8), 
+            [#text(size: scaled-font(font-sizes.layer-label), xlabel)])
+        }
+        
+        // Display ylabel and zlabel if provided
+        if ylabel-val != none {
+          content((start-x - 0.4, y-offset + h/2), anchor: "east",
+            [#text(size: scaled-font(font-sizes.layer-label), str(ylabel-val))])
+        }
+        if zlabel-val != none {
+          content((start-x + total-width + ox + 0.4, y-offset + h/2 + oy/2), anchor: "west",
+            [#text(size: scaled-font(font-sizes.layer-label), str(zlabel-val))])
+        }
+        
+        // Display diagonal label if provided
+        if diagonal-label != none {
+          let diag-start-x = start-x + total-width
+          let diag-start-y = y-offset
+          let diag-mid-x = diag-start-x + ox / 2.5
+          let diag-mid-y = diag-start-y + oy / 2.5
+          content((diag-mid-x, diag-mid-y - 0.23), angle: depth-angle-deg,
+            [#text(size: scaled-font(font-sizes.channel-number), str(diagonal-label))])
+        }
+        
+        // Track position if named
+        if name != none {
+          layer-positions.insert(name, (
+            x: start-x, y: y-offset, w: total-width, h: h, ox: ox, oy: oy, type: "custom",
+            anchors: get-layer-anchors(start-x, y-offset, total-width, h, ox, oy),
+            pool-offset: 0
+          ))
+        }
+        
+        prev-center-y = get-perspective-center-y(y-offset, h, oy)
+        prev-pool-width = 0
+      }
+      
+      // Register legend entry for custom layers (only if legend parameter is provided)
+      let custom-legend = l.at("legend", default: none)
+      if custom-legend != none {
+        // Use a unique key for each custom legend entry (legend text + color)
+        let legend-key = "custom-" + str(custom-legend) + "-" + str(fill-color.to-hex())
+        if legend-key not in legend-entries {
+          legend-entries.insert(legend-key, (label: custom-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
+        }
+      }
+    }
+    
+    // INPUT IMAGE - uses custom type with input-specific defaults
+    else if l.type == "input" {
+      // Re-route to custom handler with input defaults
+      l.insert("type", "custom")
+      if not l.keys().contains("width") { l.insert("width", 0) }
+      if not l.keys().contains("fill") { l.insert("fill", colors.input) }
+      if not l.keys().contains("opacity") { l.insert("opacity", 0.9) }
+      if not l.keys().contains("input-style") { l.insert("input-style", true) }
+      
+      // Fall through to process as custom (handled by previous if block)
+      // But since we're in else-if, we need to inline the custom logic
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
       let w = l.at("width", default: 0)
@@ -653,6 +883,7 @@ canvas(length: 1cm * scale-factor, {
       let layer-opacity = l.at("opacity", default: 0.9)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
+      
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
@@ -660,16 +891,30 @@ canvas(length: 1cm * scale-factor, {
         img = image("bird.jpg")
       }
 
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
+      // Special rendering for INPUT: draw image first, then highly transparent face on top
+      if img != none {
+        // Draw isometric image first
+        draw-isometric-image(x, y-offset, w, h, ox, oy, img)
+        
+        // Then draw highly transparent right face on top
+        let alpha-right = layer-opacity * 100%
+        line((x + w, y-offset), (x + w + ox, y-offset + oy),
+          (x + w + ox, y-offset + h + oy), (x + w, y-offset + h),
+          close: true,
+          fill: fill-color.darken(darken-amounts.right).transparentize(alpha-right),
+          stroke: dynamic-color-strokes(fill-color).solid)
+      } else {
+        // No image: use standard box-3d rendering
+        box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
+      }
       
-      // Display channels labels (below and optionally on diagonal)
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
       
-      // Track position if named
       if name != none {
         layer-positions.insert(name, (
-          x: x, y: y-offset, w: w, h: h, ox: ox, oy: oy,
-          anchors: get-layer-anchors(x, y-offset, w, h, ox, oy)
+          x: x, y: y-offset, w: w, h: h, ox: ox, oy: oy, type: "input",
+          anchors: get-layer-anchors(x, y-offset, w, h, ox, oy),
+          pool-offset: 0
         ))
       }
       
@@ -683,9 +928,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry (check for legend parameter override)
+      let layer-legend = l.at("legend", default: default-legend-labels.at("input"))
+      if "input" not in legend-entries {
+        legend-entries.insert("input", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // CONVOLUTIONAL BLOCK types
+    // CONVOLUTIONAL BLOCK types - delegates to custom with conv-specific defaults
     else if l.type == "conv" or l.type == "convres"{
       let fill-color = if l.type == "conv" {
         l.at("fill", default: colors.conv)
@@ -697,6 +948,11 @@ canvas(length: 1cm * scale-factor, {
         } else if l.type == "convres" {
         l.at("bandfill", default: colors.at("convres-relu"))
       }
+      
+      // Set up parameters for custom handler with conv defaults
+      if not l.keys().contains("fill") { l.insert("fill", fill-color) }
+      if not l.keys().contains("bandfill") { l.insert("bandfill", bandfill-color) }
+      if not l.keys().contains("widths") { l.insert("widths", (1,)) }
       let channels = l.at("channels", default: none)
       let widths = l.at("widths", default: (1,))
       let h = l.at("height", default: 5)
@@ -708,6 +964,11 @@ canvas(length: 1cm * scale-factor, {
       let ylabel-val = l.at("ylabel", default: none)
       let zlabel-val = l.at("zlabel", default: none)
       let layer-show-relu = l.at("show-relu", default: show-relu)
+      let img = l.at("image", default: none)
+      
+      if img == "default" {
+        img = image("bird.jpg")
+      }
       
       // Use dynamic color strokes for fill-color and bandfill-color
       let dyn-strokes = dynamic-color-strokes(fill-color)
@@ -769,6 +1030,11 @@ canvas(length: 1cm * scale-factor, {
         close: true,
         fill: right-face-color.darken(darken-amounts.right).transparentize(opacity-values.right-face),
         stroke: dyn-strokes.solid)
+      
+      // Draw image on top of right face if provided
+      if img != none {
+        draw-isometric-image(start-x, y-offset, total-width, h, ox, oy, img)
+      }
 
       // Draw all edges for band divisions (once each)
       cumulative-x = start-x
@@ -781,12 +1047,10 @@ canvas(length: 1cm * scale-factor, {
         cumulative-x += band-width
       }
       
-      // Draw outer edges of the block (only edges not shared between bands)
+      // Draw outer edges of the block (excluding right face edges which are already drawn)
       line((start-x, y-offset + h), (start-x + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
       line((start-x + ox, y-offset + h + oy), (start-x + total-width + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
       line((start-x + total-width, y-offset + h), (start-x + total-width + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
-      line((start-x + total-width + ox, y-offset + oy), (start-x + total-width + ox, y-offset + h + oy), stroke: dyn-strokes.solid)
-      line((start-x + total-width, y-offset), (start-x + total-width + ox, y-offset + oy), stroke: dyn-strokes.solid)
       
       prev-x = start-x + total-width
       prev-depth-offset = ox
@@ -836,26 +1100,37 @@ canvas(length: 1cm * scale-factor, {
       
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at(l.type))
+      if l.type not in legend-entries {
+        legend-entries.insert(l.type, (label: layer-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
+      }
     }
     
-    // POOLING LAYER
+    // POOLING LAYER - delegates to custom with pool-specific positioning
     else if l.type == "pool" {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
       let w = 0.1
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.pool)
+      let layer-opacity = l.at("opacity", default: 0.75)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
+      let layer-offset = l.at("offset", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = prev-center-y - h / 2 - oy / 2
-      let pool-x = x + prev-depth-offset / 2 - ox / 2
+      let pool-x = if layer-offset != none { x + layer-offset } else { x + prev-depth-offset / 2 - ox / 2 }
       
-      box-3d(pool-x, y-offset, w, h, d, fill-color, opacity: 0.75)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
       
-      // Display channels labels
+      box-3d(pool-x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
+      
       draw-channels-labels(channels, pool-x + w/2, pool-x + w, y-offset, ox, oy)
       
-      // Update previous layer's pool-offset if it was named
       if i > 0 {
         let prev-layer = layers.at(i - 1)
         let prev-name = prev-layer.at("name", default: none)
@@ -868,7 +1143,6 @@ canvas(length: 1cm * scale-factor, {
         }
       }
       
-      // Track position if named
       if name != none {
         layer-positions.insert(name, (
           x: pool-x, y: y-offset, w: w, h: h, ox: ox, oy: oy, type: "pool",
@@ -879,24 +1153,41 @@ canvas(length: 1cm * scale-factor, {
       
       prev-x = pool-x + w
       prev-depth-offset = ox
-      x = pool-x + w
+      if layer-offset != none {
+        x += layer-offset + w
+      } else {
+        x = pool-x + w
+      }
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = w
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("pool"))
+      if "pool" not in legend-entries {
+        legend-entries.insert("pool", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // UNPOOLING LAYER
+    // UNPOOLING LAYER - delegates to custom with unpool-specific positioning
     else if l.type == "unpool" {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
       let w = 0.1
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.unpool)
+      let layer-opacity = l.at("opacity", default: 0.75)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
+      let layer-offset = l.at("offset", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = prev-center-y - h / 2 - oy / 2
-      let unpool-x = x + prev-depth-offset / 2 - ox / 2
+      let unpool-x = if layer-offset != none { x + layer-offset } else { x + prev-depth-offset / 2 - ox / 2 }
       
-      box-3d(unpool-x, y-offset, w, h, d, fill-color, opacity: 0.75)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(unpool-x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, unpool-x + w/2, unpool-x + w, y-offset, ox, oy)
@@ -911,12 +1202,22 @@ canvas(length: 1cm * scale-factor, {
       
       prev-x = unpool-x + w
       prev-depth-offset = ox
-      x = unpool-x + w
+      if layer-offset != none {
+        x += layer-offset + w
+      } else {
+        x = unpool-x + w
+      }
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = w
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("unpool"))
+      if "unpool" not in legend-entries {
+        legend-entries.insert("unpool", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // DECONVOLUTIONAL LAYER
+    // DECONVOLUTIONAL LAYER - delegates to custom with deconv-specific defaults
     else if l.type == "deconv" {
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
@@ -924,11 +1225,17 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.deconv)
+      let layer-opacity = l.at("opacity", default: 0.7)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: 0.7)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
@@ -951,9 +1258,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("deconv"))
+      if "deconv" not in legend-entries {
+        legend-entries.insert("deconv", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // CONCATENATION LAYER
+    // CONCATENATION LAYER - delegates to custom with concat-specific defaults
     else if l.type == "concat" {
       let h = l.at("height", default: 3)
       let d = l.at("depth", default: 3)
@@ -961,11 +1274,17 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.concat)
+      let layer-opacity = l.at("opacity", default: 0.7)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: 0.7)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
@@ -988,9 +1307,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("concat"))
+      if "concat" not in legend-entries {
+        legend-entries.insert("concat", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // GLOBAL AVERAGE POOLING
+    // GLOBAL AVERAGE POOLING - delegates to custom with gap-specific defaults
     else if l.type == "gap" {
       let h = l.at("height", default: 1.5)
       let d = l.at("depth", default: 1.5)
@@ -998,11 +1323,17 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.gap)
+      let layer-opacity = l.at("opacity", default: 0.7)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: 0.7)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
@@ -1025,9 +1356,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("gap"))
+      if "gap" not in legend-entries {
+        legend-entries.insert("gap", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // FULLY CONNECTED
+    // FULLY CONNECTED - delegates to custom with fc-specific defaults
     else if l.type == "fc" {
       let h = l.at("height", default: 1.2)
       let d = l.at("depth", default: 1.2)
@@ -1035,11 +1372,17 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.fc)
+      let layer-opacity = l.at("opacity", default: 0.7)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: 0.7)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
@@ -1062,9 +1405,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("fc"))
+      if "fc" not in legend-entries {
+        legend-entries.insert("fc", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // SUM NODE
+    // SUM NODE - uses unique circle rendering (not box-based like custom)
     else if l.type == "sum" {
       let radius = l.at("radius", default: 0.4)
       let label = l.at("label", default: "+")
@@ -1117,6 +1466,12 @@ canvas(length: 1cm * scale-factor, {
       
       prev-center-y = center-y
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("sum"))
+      if "sum" not in legend-entries {
+        legend-entries.insert("sum", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
     // CONVOLUTIONAL SOFTMAX (Combined layer)
@@ -1129,10 +1484,15 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.convsoftmax)
       let layer-opacity = l.at("opacity", default: 0.5)
       let channels = l.at("channels", default: none)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels
       draw-channels-labels(channels, x + w/2, x + w, y-offset, ox, oy)
@@ -1155,9 +1515,15 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at("convsoftmax"))
+      if "convsoftmax" not in legend-entries {
+        legend-entries.insert("convsoftmax", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
     
-    // SOFTMAX / OUTPUT
+    // SOFTMAX / OUTPUT - delegates to custom with softmax/output-specific defaults
     else if l.type == "softmax" or l.type == "output" {
       let h = l.at("height", default: 0.8)
       let d = l.at("depth", default: 0.8)
@@ -1167,10 +1533,16 @@ canvas(length: 1cm * scale-factor, {
       let classes = l.at("classes", default: none)
       let channels = l.at("channels", default: none)
       let fill-color = l.at("fill", default: if l.type == "softmax" { colors.softmax } else { colors.output })
+      let layer-opacity = l.at("opacity", default: 0.5)
+      let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
       let y-offset = get-y-offset-for-center-on-axis(h, d, arrow-axis-y)
       
-      box-3d(x, y-offset, w, h, d, fill-color, opacity: 0.5)
+      if img == "default" {
+        img = image("bird.jpg")
+      }
+      
+      box-3d(x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       // Display channels labels (preferred over classes)
       if channels != none {
@@ -1197,6 +1569,12 @@ canvas(length: 1cm * scale-factor, {
       x += w
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
       prev-pool-width = 0
+      
+      // Register legend entry
+      let layer-legend = l.at("legend", default: default-legend-labels.at(l.type))
+      if l.type not in legend-entries {
+        legend-entries.insert(l.type, (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      }
     }
   }
   
@@ -1393,39 +1771,89 @@ canvas(length: 1cm * scale-factor, {
   }
   
   if show-legend {
-    let legend-x = x + 3
-    let legend-y = arrow-axis-y + 2
+    // Position legend after the last layer, accounting for its width and depth
+    let legend-x = prev-x + prev-depth-offset + 1.5
     let legend-item-height = 0.4
     let legend-box-size = 0.3
+    
+    // Count total legend entries to calculate vertical centering
+    let ordered-types = ("input", "conv", "convres", "pool", "unpool", "deconv", "concat", "sum", "gap", "fc", "convsoftmax", "softmax", "output")
+    let entry-count = 0
+    for layer-type in ordered-types {
+      if layer-type in legend-entries {
+        entry-count += 1
+      }
+    }
+    for (key, entry) in legend-entries {
+      if key.starts-with("custom-") {
+        entry-count += 1
+      }
+    }
+    
+    // Calculate total legend height: title + spacing + (entries * item-height)
+    let legend-total-height = 0.6 + entry-count * legend-item-height
+    
+    // Center legend vertically around arrow-axis-y
+    let legend-y = arrow-axis-y + legend-total-height / 2
     
     content((legend-x, legend-y), 
       [#h(20pt)#text(size: scaled-font(font-sizes.legend-title), weight: "bold", "Layer Types")])
     
     legend-y -= 0.6
     
-    let legend-items = (
-      (type: "input", label: "Input", color: colors.input),
-      (type: "conv", label: "Convolution", color: colors.conv),
-      (type: "convres", label: "Conv Residual", color: colors.convres),
-      (type: "pool", label: "Pooling", color: colors.pool),
-      (type: "unpool", label: "Unpooling", color: colors.unpool),
-      (type: "deconv", label: "Deconvolution", color: colors.deconv),
-      (type: "concat", label: "Concatenation", color: colors.concat),
-      (type: "sum", label: "Element-wise Sum", color: colors.sum),
-      (type: "gap", label: "Global Avg Pool", color: colors.gap),
-      (type: "fc", label: "Fully Connected", color: colors.fc),
-      (type: "convsoftmax", label: "Conv Softmax", color: colors.convsoftmax),
-      (type: "softmax", label: "Softmax", color: colors.softmax),
-      (type: "output", label: "Output", color: colors.output),
-    )
-    
-    for item in legend-items {
-      if item.type in used-layer-types {
-        rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-          fill: item.color.transparentize(30%), stroke: strokes.solid)
+    for layer-type in ordered-types {
+      if layer-type in legend-entries {
+        let entry = legend-entries.at(layer-type)
+        let item-stroke = dynamic-color-strokes(entry.color)
+        let alpha = 100% - entry.at("opacity", default: 1.0) * 100%
+        
+        if entry.at("show-relu", default: false) {
+          // Draw split rectangle: 2/3 fill color (left), 1/3 bandfill color (right)
+          let split-x = legend-x + legend-box-size * 2 / 3
+          rect((legend-x, legend-y), (split-x, legend-y + legend-box-size),
+            fill: entry.color.transparentize(alpha), stroke: none)
+          rect((split-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: entry.bandfill.transparentize(alpha), stroke: none)
+          // Draw outline
+          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: none, stroke: item-stroke.solid)
+        } else {
+          // Draw solid rectangle
+          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
+        }
         
         content((legend-x + legend-box-size + 0.2, legend-y + legend-box-size / 2), anchor: "west",
-          [#text(size: scaled-font(font-sizes.legend-item), item.label)])
+          [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
+        
+        legend-y -= legend-item-height
+      }
+    }
+    
+    // Render custom legend entries
+    for (key, entry) in legend-entries {
+      if key.starts-with("custom-") {
+        let item-stroke = dynamic-color-strokes(entry.color)
+        let alpha = 100% - entry.at("opacity", default: 1.0) * 100%
+        
+        if entry.at("show-relu", default: false) {
+          // Draw split rectangle: 2/3 fill color (left), 1/3 bandfill color (right)
+          let split-x = legend-x + legend-box-size * 2 / 3
+          rect((legend-x, legend-y), (split-x, legend-y + legend-box-size),
+            fill: entry.color.transparentize(alpha), stroke: none)
+          rect((split-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: entry.bandfill.transparentize(alpha), stroke: none)
+          // Draw outline
+          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: none, stroke: item-stroke.solid)
+        } else {
+          // Draw solid rectangle
+          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+            fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
+        }
+        
+        content((legend-x + legend-box-size + 0.2, legend-y + legend-box-size / 2), anchor: "west",
+          [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
         
         legend-y -= legend-item-height
       }
