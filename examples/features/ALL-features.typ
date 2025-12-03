@@ -3,7 +3,7 @@
 #set page(width: auto, height: auto, margin: 5mm)
 
 #draw-network((
-    (type: "input", image: "default"), // You can also specify a custom image path
+    (type: "input", image: "default"),
     (type: "conv", offset: 2), // Next layers are automatically connected with arrows
     (type: "conv", offset: 2),
     (type: "pool"), // Pool layers are sticked to previous convolution block

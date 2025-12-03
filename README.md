@@ -10,13 +10,13 @@ Under the hood, this package only uses the native Typst package [CeTZ](https://t
 
 ## Usage
 
-Simply import the package in order to call its drawing function:
+Simply import the all-in-one drawing function from the neural-netz package:
 ```typ
-#import "@preview/neural-netz:0.2.0"
+#import "@preview/neural-netz:0.2.0": draw-network
 ```
 You can then call `draw-network` which has the following arguments:
 ```typ
-#let draw-network(
+#draw-network(
   layers,
   connections: (),
   palette: "warm",
@@ -27,7 +27,7 @@ You can then call `draw-network` which has the following arguments:
   show-relu: false,
 )
 ```
-See the examples in the following section to understand how to use it. Alternatively, you can also start from already written architecture examples (see the Examples section).
+See the examples in the following section to understand how to use it. Alternatively, you can also start from already written architecture examples (see the Examples section, near the end).
 
 ## Getting started
 
@@ -37,7 +37,7 @@ Here are a few simple features for getting started.
 
 ```typ
 #draw-network((
-    (type: "input", image: "default"), // You can also specify a custom image path
+    (type: "input", image: "default"),
     (type: "conv", offset: 2), // Next layers are automatically connected with arrows
     (type: "conv", offset: 2),
     (type: "pool"), // Pool layers are sticked to previous convolution block
@@ -47,6 +47,8 @@ Here are a few simple features for getting started.
 <p align="center">
 <img src="gallery/features/basic-layout.png" alt="Basic layout example" width="350px"/>
 </p>
+
+For the input type layer, you can also specify a custom image by giving `image: image("path/to/your/image.jpg")`. Additionally not giving any image is equivalent to giving `image: none`.
 
 ### Dimensions and labels
 
@@ -91,10 +93,12 @@ show-legend: true,
 
 Using `show-legend: true` you can add a smart legend to your visual !
 
-Additionally, if you network does not fit the page width of your Typst document, you can reduce the scale by giving `scale: 50%` as argument of `draw-network`
+And if you network does not fit the page width of your Typst document, **you can reduce the scale by giving `scale: 50%` as argument of `draw-network`** (ajust to scale value to your need).
 
 
 ### Adding other connexions
+
+Though the main axis connections will be drawn automatically, you can specify other connexions to draw using the `connexions` argument of `draw-network`:
 
 ```typ
 #draw-network((
@@ -118,15 +122,17 @@ show-relu: true // visualize relu using darker color on convolution layers
 
 ### Predefined layer types
 
-Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name in the code below. Of course, this is just a starting point, you can modify most of there default attributes.
+Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name underneath each layer. Of course, this is just a starting point, you can modify most of there default attributes.
 <p align="center">
 <img src="gallery/features/predefined-layers.png" alt="Adding connexions example" width="600"/>
 </p>
-<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks/U-Net.typ">code for this image</a></p>
+<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/56e7042b97a7856394963532438f316aea95a596/examples/features/predefined-layers.typ">code for this image</a></p>
 
 ### Custom layers
 
-If you prefer to create you own type of layers, use `type: "custom"` as a starting point. It is a generic layer, that is easily customizable. It can have one or multiple channels, with an optional bandwidth color for symbolizing  activation functions (e.g. ReLU) It can also be added to the smart legend, when specifying a legend label (no need to specify the legend everytime for the same-colored custom layers).
+If you prefer to create you own type of layers, use `type: "custom"` as a starting point. It is a generic layer, that is easily customizable. It can have one or multiple channels, with an optional "bandfill" color for symbolizing activation functions (e.g. ReLU). Note that the visiblity of activations can be set with the boolean `show-relu` at the `draw-network` scale, and can be overwritten on a per-layer basis.
+
+A custom layer can also be added to the smart legend, when specifying a `legend` label (no need to specify the legend everytime for the same-colored custom layers).
 
 ```typ
 #draw-network((
@@ -171,19 +177,19 @@ Here are a few network architectures implemented with neural-netz (more examples
 <p align="center">
 <img src="gallery/networks/ResNet18.png" alt="ResNet18 visualization" width="500"/>
 </p>
-<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks/ResNet18.typ">code for this image</a></p>
+<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/56e7042b97a7856394963532438f316aea95a596/examples/networks/ResNet18.typ">code for this image</a></p>
 
 <h3 style="text-align: center;">U-Net</h3>
 <p align="center">
 <img src="gallery/networks/U-Net.png" alt="U-Net visualization" width="500"/>
 </p>
-<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks/U-Net.typ">code for this image</a></p>
+<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/56e7042b97a7856394963532438f316aea95a596/examples/networks/U-Net.typ">code for this image</a></p>
 
 <h3 style="text-align: center;">FCN-8</h3>
 <p align="center">
 <img src="gallery/networks/FCN-8.png" alt="FCN-8 visualization" width="500"/>
 </p>
-<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/5c434055a5bcf83eee75ab88ad5a7ac77c430feb/examples/networks/FCN-8.typ">code for this image</a></p>
+<p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/56e7042b97a7856394963532438f316aea95a596/examples/networks/FCN-8.typ">code for this image</a></p>
 
 ## Cite this work
 If you use the neural-netz package for a scientific publication, you can cite it as follows:
