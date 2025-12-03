@@ -1,9 +1,11 @@
+#import "../../src/lib.typ": draw-network // FOR YOUR OWN FILES, IMPORT THE FUNCTION FROM THE NEURAL-NETZ PACKAGE INSTEAD
+
 #set page(width: auto, height: auto, margin: 5mm)
 
 #draw-network((
-  (type: "conv", channels: ("1", "128"), widths: (0.2,), height: 8, depth: 8, name: "input"),
+  (type: "input", image: "default", channels: ("1", "128"), widths: (0.2,), height: 8, depth: 8, name: "input"),
   
-  (type: "conv", channels: ("16", "128"), widths: (0.4,), height: 8, depth: 8, name: "down1"),
+  (type: "conv", channels: ("16", "128"), widths: (0.4,), height: 8, depth: 8, name: "down1", offset: 1.9),
   (type: "pool", height: 6.5, depth: 6.5, name: "pool1"),
   
   (type: "conv", channels: ("32", "64"), widths: (0.5,), height: 6.5, depth: 6.5, name: "down2"),

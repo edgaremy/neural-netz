@@ -1,3 +1,5 @@
+#import "../../src/lib.typ": draw-network // FOR YOUR OWN FILES, IMPORT THE FUNCTION FROM THE NEURAL-NETZ PACKAGE INSTEAD
+
 #set page(width: auto, height: auto, margin: 5mm)
 
 #let layers = (

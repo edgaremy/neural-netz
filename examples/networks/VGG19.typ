@@ -1,9 +1,11 @@
+#import "../../src/lib.typ": draw-network // FOR YOUR OWN FILES, IMPORT THE FUNCTION FROM THE NEURAL-NETZ PACKAGE INSTEAD
+
 #set page(width: auto, height: auto, margin: 5mm)
 
 #let layers = (
   (
     type: "input",
-    image-file: "default",
+    image: "default",
     height: 8,
     depth: 8,
     label: "input",
