@@ -1070,7 +1070,7 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "+")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.sum)
-      let layer-opacity = l.at("opacity", default: 0.6)
+      let layer-opacity = l.at("opacity", default: 1.0)
       let channels = l.at("channels", default: none)
       
       // Center x accounts for depth offset of previous arrow
@@ -1078,8 +1078,8 @@ canvas(length: 1cm * scale-factor, {
       let center-y = arrow-axis-y
 
       let dyn-stroke = dynamic-color-strokes(fill-color)
-      dyn-stroke.solid.paint = dyn-stroke.solid.paint.darken(20%) // slightly darker stroke than for other layers
-      dyn-stroke.solid.thickness = dyn-stroke.solid.thickness * 1.4
+      dyn-stroke.solid.paint = dyn-stroke.solid.paint.darken(10%) // slightly darker stroke than for other layers
+      fill-color = fill-color.transparentize((1-layer-opacity)*100%)
 
       circle((center-x, center-y), radius: radius,
         fill: gradient.radial(
@@ -1090,7 +1090,7 @@ canvas(length: 1cm * scale-factor, {
         stroke: dyn-stroke.solid)
       
       if label != none {
-        let symbole-size = scaled-font(font-sizes.label * 2.2)
+        let symbole-size = scaled-font(font-sizes.label * 2.5)
         content((center-x, center-y), 
           [#v(-0.185 * symbole-size)#text(size: symbole-size, weight: "bold", fill: dyn-stroke.solid.paint, label)])
       }
