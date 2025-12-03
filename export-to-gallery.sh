@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Script to export Typst example files to PNG images
-# Usage: ./export-examples.sh
+# Usage: ./export-to-gallery.sh
+# (you may need to make it executable with chmod +x export-to-gallery.sh)
+# (ensure you have Typst installed and accessible in your PATH)
 
 set -e  # Exit on error
 

@@ -5,44 +5,44 @@
 #let layers = (
   (
     type: "input",
-    label: "Input"
+    label: "input"
   ),(
     type: "conv",
-    widths: (0.3, 0.4),
-    label: "Conv Block"
+    widths: (0.3, 0.3),
+    label: "conv"
   ),(
     type: "pool",
-    channels: ("", "pool"),
-    label: "MaxPool",
+    channels: ("pool",),
+    label: "pool",
     offset: 1
   ),(
     type: "convres",
-    widths: (0.35, 0.35),
-    label: "ResBlock",
+    widths: (0.3, 0.3),
+    label: "convres",
     offset: 1
   ),(
     type: "unpool",
-    channels: ("", "unpool"),
-    label: "Unpool",
+    channels: ("unpool",),
+    label: "unpool",
     offset: 1
   ),(
     type: "deconv",
-    label: "Deconv",
+    label: "deconv",
     offset: 1
   ),(
     type: "concat",
-    label: "Concat",
+    label: "concat",
     offset: 1.4
   ),(
     type: "gap",
-    label: "GAP"
+    label: "gap"
   ),(
     type: "fc",
-    label: "Dense",
+    label: "fc",
     offset: 0.7
   ),(
     type: "convsoftmax",
-    label: "ConvSoftmax",
+    label: "convsoftmax",
     offset: 0.7
   ),(
     type: "sum",
@@ -51,18 +51,18 @@
     offset: 0.7
   ),(
     type: "softmax",
-    label: "Softmax",
+    label: "softmax",
     offset: 0.4
   ),(
     type: "output",
-    label: "Output",
+    label: "output",
     offset: 1
   ),(
     type: "custom",
-    widths: (0.2, 0.3, 0.2),
+    widths: (0.3, 0.3),
     height: 3,
     depth: 3,
-    label: "Custom",
+    label: "custom",
     legend: "Custom Layer",
     offset: 0.6
   ),

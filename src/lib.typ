@@ -626,10 +626,11 @@ canvas(length: 1cm * scale-factor, {
         let curr-y-offset = get-y-offset-for-center-on-axis(curr-h, curr-d, arrow-axis-y)
         let end-y = get-perspective-center-y(curr-y-offset, curr-h, curr-oy)
         // Arrow ends at true_west of current layer (depth-adjusted)
-        // For pool/unpool with offset, account for the offset in arrow position
+        // For pool/unpool with offset, calculate actual layer position first
         let is-curr-pool-or-unpool = l.type == "pool" or l.type == "unpool"
         let curr-offset = if is-curr-pool-or-unpool { l.at("offset", default: none) } else { none }
-        let end-x = if curr-offset != none { x + curr-offset + curr-ox / 2 } else { x + curr-ox / 2 }
+        let curr-layer-x = if curr-offset != none { x + curr-offset } else if is-curr-pool-or-unpool { x + prev-depth-offset / 2 - curr-ox / 2 } else { x }
+        let end-x = curr-layer-x + curr-ox / 2
         
         let prev-name = prev-layer.at("name", default: none)
         let curr-name = l.at("name", default: none)
@@ -1159,7 +1160,7 @@ canvas(length: 1cm * scale-factor, {
         x = pool-x + w
       }
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
-      prev-pool-width = w
+      prev-pool-width = 0
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("pool"))
@@ -1208,7 +1209,7 @@ canvas(length: 1cm * scale-factor, {
         x = unpool-x + w
       }
       prev-center-y = get-perspective-center-y(y-offset, h, oy)
-      prev-pool-width = w
+      prev-pool-width = 0
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("unpool"))
