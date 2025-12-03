@@ -1,0 +1,10 @@
+cff-version: 1.0.0
+message: "If you use this package, please cite it as below."
+authors:
+- family-names: "Remy"
+  given-names: "Edgar"
+  orcid: "https://orcid.org/0009-0006-4838-5183"
+title: "neural-netz, a Typst Package"
+version: 0.1.0
+date-released: 2017-12-18
+url: "https://github.com/edgaremy/neural-netz/"
