@@ -124,7 +124,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 
 Here is a visualization of all the predefined layer types, in both color palettes available (`"warm"` (default) and `"cold"`). You can find their associated name underneath each layer. Of course, this is just a starting point, you can modify most of their default attributes.
 <p align="center">
-<img src="gallery/features/predefined-layers.png" alt="Predefined layers example" width="600"/>
+<img src="gallery/features/predefined-layers.png" alt="Predefined layers example" width="650"/>
 </p>
 <p style="text-align: center;"><a href="https://github.com/edgaremy/neural-netz/blob/56e7042b97a7856394963532438f316aea95a596/examples/features/predefined-layers.typ">code for this image</a></p>
 
