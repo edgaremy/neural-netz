@@ -45,7 +45,7 @@ Here are a few simple features for getting started.
 ))
 ```
 <p align="center">
-<img src="gallery/features/basic-layout.png" alt="Basic layout example" width="350px"/>
+<img src="gallery/features/basic-layout.png" alt="Basic layout example" width="400px"/>
 </p>
 
 For the input type layer, you can also specify a custom image by giving `image: image("path/to/your/image.jpg")`. Additionally not giving any image is equivalent to giving `image: none`.
@@ -117,7 +117,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 )
 ```
 <p align="center">
-<img src="gallery/features/connexions.png" alt="Adding connexions example" width="450"/>
+<img src="gallery/features/connexions.png" alt="Adding connexions example" width="500"/>
 </p>
 
 ### Predefined layer types
@@ -166,7 +166,7 @@ show-legend: true
 )
 ```
 <p align="center">
-<img src="gallery/features/customize.png" alt="Custom layer example" width="350"/>
+<img src="gallery/features/customize.png" alt="Custom layer example" width="450"/>
 </p>
 
 
