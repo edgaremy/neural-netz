@@ -1,0 +1,37 @@
+{
+    "@context": "https://w3id.org/codemeta/3.0",
+    "type": "SoftwareSourceCode",
+    "applicationCategory": "Computer Vision",
+    "author": [
+        {
+            "id": "https://orcid.org/0009-0006-4838-5183",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "CNRS, University of Toulouse, France"
+            },
+            "email": "edgar.remy@cnrs.fr",
+            "familyName": "Remy",
+            "givenName": "Edgar"
+        }
+    ],
+    "codeRepository": "https://github.com/edgaremy/neural-netz",
+    "dateCreated": "2025-12-02",
+    "dateModified": "2025-12-04",
+    "datePublished": "2025-12-02",
+    "description": "A Typst package for visualizing Neural Network Architectures with high-quality diagrams.",
+    "downloadUrl": "https://github.com/edgaremy/neural-netz/releases/download/v0.2.0/neural-netz.0.2.0.zip",
+    "keywords": [
+        "deep learning",
+        "visualization",
+        "neural networks",
+        "typst"
+    ],
+    "license": "https://spdx.org/licenses/MIT-0",
+    "name": "neural-netz, a Typst Package",
+    "programmingLanguage": "Typst",
+    "relatedLink": "https://typst.app/universe/package/neural-netz",
+    "releaseNotes": "- Added new generic custom layer type.\n- Improved smart legend generation\n- Fixed use of custom images in input layer and made it more robust to various image widths.\n- More detailed documentation in the README.\n- Minor fixes.\n",
+    "version": "0.2.0",
+    "issueTracker": "https://github.com/edgaremy/neural-netz/issues"
+}
