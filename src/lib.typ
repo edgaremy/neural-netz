@@ -613,12 +613,11 @@ canvas(length: 1cm * scale-factor, {
     x += gap
     
     // Calculate and store arrow segment positions for ALL layers (for skip connections)
-    // Only draw arrows if both current and previous layers have show-connections enabled
-    let curr-show-connections = l.at("show-connections", default: if l.type == "input" { false } else { true })
-    if i > 0 and curr-show-connections {
+    // Only draw arrows if previous layer has show-connection enabled (controls outgoing arrows)
+    if i > 0 {
       let prev-layer = layers.at(i - 1)
-      let prev-show-connections = prev-layer.at("show-connections", default: if prev-layer.type == "input" { false } else { true })
-      if prev-show-connections {
+      let prev-show-connection = prev-layer.at("show-connection", default: if prev-layer.type == "input" { false } else { true })
+      if prev-show-connection {
         // Arrow starts from true_east of previous layer (depth-adjusted)
         let start-x = prev-x + prev-pool-width + prev-depth-offset / 2
         let start-y = prev-center-y
@@ -686,7 +685,7 @@ canvas(length: 1cm * scale-factor, {
       let ylabel-val = l.at("ylabel", default: none)
       let zlabel-val = l.at("zlabel", default: none)
       let layer-show-relu = l.at("show-relu", default: show-relu)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let img = l.at("image", default: none)
       let is-input-style = l.at("input-style", default: false)
       
@@ -876,7 +875,7 @@ canvas(length: 1cm * scale-factor, {
       if not l.keys().contains("fill") { l.insert("fill", colors.input) }
       if not l.keys().contains("opacity") { l.insert("opacity", 0.9) }
       if not l.keys().contains("input-style") { l.insert("input-style", true) }
-      if not l.keys().contains("show-connections") { l.insert("show-connections", false) }
+      if not l.keys().contains("show-connection") { l.insert("show-connection", false) }
       
       // Fall through to process as custom (handled by previous if block)
       // But since we're in else-if, we need to inline the custom logic
@@ -887,7 +886,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.input)
       let layer-opacity = l.at("opacity", default: 0.9)
-      let layer-show-connections = l.at("show-connections", default: false)
+      let layer-show-connection = l.at("show-connection", default: false)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       
@@ -971,7 +970,7 @@ canvas(length: 1cm * scale-factor, {
       let ylabel-val = l.at("ylabel", default: none)
       let zlabel-val = l.at("zlabel", default: none)
       let layer-show-relu = l.at("show-relu", default: show-relu)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let img = l.at("image", default: none)
       
       if img == "default" {
@@ -1124,7 +1123,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.pool)
       let layer-opacity = l.at("opacity", default: 0.75)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
@@ -1190,7 +1189,7 @@ canvas(length: 1cm * scale-factor, {
       let w = 0.1
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.unpool)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let layer-opacity = l.at("opacity", default: 0.75)
       let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
@@ -1248,7 +1247,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.deconv)
       let layer-opacity = l.at("opacity", default: 0.7)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1298,7 +1297,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.concat)
       let layer-opacity = l.at("opacity", default: 0.7)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1348,7 +1347,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.gap)
       let layer-opacity = l.at("opacity", default: 0.7)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1398,7 +1397,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.fc)
       let layer-opacity = l.at("opacity", default: 0.7)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1445,7 +1444,7 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: "+")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.sum)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let layer-opacity = l.at("opacity", default: 1.0)
       let channels = l.at("channels", default: none)
       
@@ -1507,7 +1506,7 @@ canvas(length: 1cm * scale-factor, {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
       let w = l.at("width", default: 0.1)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.convsoftmax)
@@ -1559,7 +1558,7 @@ canvas(length: 1cm * scale-factor, {
       let w = 0.2
       let label = l.at("label", default: if l.type == "softmax" { "Softmax" } else { "Output" })
       let name = l.at("name", default: none)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let layer-show-connection = l.at("show-connection", default: true)
       let classes = l.at("classes", default: none)
       let channels = l.at("channels", default: none)
       let fill-color = l.at("fill", default: if l.type == "softmax" { colors.softmax } else { colors.output })
