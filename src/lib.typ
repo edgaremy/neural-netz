@@ -76,9 +76,9 @@ let dynamic-color-strokes(fill) = {
 }
 
 let font-sizes = (
-  label: 9pt,
+  label: 8.5pt,
   channel-number: 7pt,
-  layer-label: 7pt,
+  layer-label: 8.5pt,
   output-number: 8pt,
   legend-title: 10pt,
   legend-item: 8pt,
