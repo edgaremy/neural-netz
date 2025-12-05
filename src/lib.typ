@@ -580,7 +580,7 @@ canvas(length: 1cm * scale-factor, {
   let used-layer-types = (:)
   let layer-positions = (:)
   let arrow-segments = (:)
-  let legend-entries = (:)  // Collect legend entries: key -> (label, color)
+  let legend-entries = ()  // Collect legend entries in order of appearance: array of (key, label, color, ...)
   
   // Default legend labels for each layer type
   let default-legend-labels = (
@@ -862,8 +862,8 @@ canvas(length: 1cm * scale-factor, {
       if custom-legend != none {
         // Use a unique key for each custom legend entry (legend text + color)
         let legend-key = "custom-" + str(custom-legend) + "-" + str(fill-color.to-hex())
-        if legend-key not in legend-entries {
-          legend-entries.insert(legend-key, (label: custom-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
+        if not legend-entries.any(e => e.key == legend-key) {
+          legend-entries.push((key: legend-key, label: custom-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
         }
       }
     }
@@ -938,8 +938,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry (check for legend parameter override)
       let layer-legend = l.at("legend", default: default-legend-labels.at("input"))
-      if "input" not in legend-entries {
-        legend-entries.insert("input", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "input") {
+        legend-entries.push((key: "input", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1111,8 +1111,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at(l.type))
-      if l.type not in legend-entries {
-        legend-entries.insert(l.type, (label: layer-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == l.type) {
+        legend-entries.push((key: l.type, label: layer-legend, color: fill-color, bandfill: bandfill-color, show-relu: layer-show-relu, opacity: layer-opacity))
       }
     }
     
@@ -1125,6 +1125,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.pool)
       let layer-opacity = l.at("opacity", default: 0.75)
       let layer-show-connections = l.at("show-connections", default: true)
+      let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let layer-offset = l.at("offset", default: none)
@@ -1139,6 +1140,11 @@ canvas(length: 1cm * scale-factor, {
       box-3d(pool-x, y-offset, w, h, d, fill-color, opacity: layer-opacity, show-left: true, show-right: true, image: img)
       
       draw-channels-labels(channels, pool-x + w/2, pool-x + w, y-offset, ox, oy)
+      
+      if label != none {
+        content((pool-x + w/2, y-offset - 0.5), 
+          [#text(size: scaled-font(font-sizes.label), weight: "bold", label)])
+      }
       
       if i > 0 {
         let prev-layer = layers.at(i - 1)
@@ -1172,8 +1178,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("pool"))
-      if "pool" not in legend-entries {
-        legend-entries.insert("pool", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "pool") {
+        legend-entries.push((key: "pool", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1186,7 +1192,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.unpool)
       let layer-show-connections = l.at("show-connections", default: true)
       let layer-opacity = l.at("opacity", default: 0.75)
-      let layer-show-connections = l.at("show-connections", default: true)
+      let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let layer-offset = l.at("offset", default: none)
@@ -1202,6 +1208,11 @@ canvas(length: 1cm * scale-factor, {
       
       // Display channels labels
       draw-channels-labels(channels, unpool-x + w/2, unpool-x + w, y-offset, ox, oy)
+      
+      if label != none {
+        content((unpool-x + w/2, y-offset - 0.5), 
+          [#text(size: scaled-font(font-sizes.label), weight: "bold", label)])
+      }
       
       // Track position if named
       if name != none {
@@ -1223,8 +1234,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("unpool"))
-      if "unpool" not in legend-entries {
-        legend-entries.insert("unpool", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "unpool") {
+        legend-entries.push((key: "unpool", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1273,8 +1284,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("deconv"))
-      if "deconv" not in legend-entries {
-        legend-entries.insert("deconv", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "deconv") {
+        legend-entries.push((key: "deconv", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1323,8 +1334,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("concat"))
-      if "concat" not in legend-entries {
-        legend-entries.insert("concat", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "concat") {
+        legend-entries.push((key: "concat", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1373,8 +1384,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("gap"))
-      if "gap" not in legend-entries {
-        legend-entries.insert("gap", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "gap") {
+        legend-entries.push((key: "gap", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1423,8 +1434,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("fc"))
-      if "fc" not in legend-entries {
-        legend-entries.insert("fc", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "fc") {
+        legend-entries.push((key: "fc", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1486,8 +1497,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("sum"))
-      if "sum" not in legend-entries {
-        legend-entries.insert("sum", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "sum") {
+        legend-entries.push((key: "sum", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1536,8 +1547,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at("convsoftmax"))
-      if "convsoftmax" not in legend-entries {
-        legend-entries.insert("convsoftmax", (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == "convsoftmax") {
+        legend-entries.push((key: "convsoftmax", label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
     
@@ -1591,8 +1602,8 @@ canvas(length: 1cm * scale-factor, {
       
       // Register legend entry
       let layer-legend = l.at("legend", default: default-legend-labels.at(l.type))
-      if l.type not in legend-entries {
-        legend-entries.insert(l.type, (label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
+      if not legend-entries.any(e => e.key == l.type) {
+        legend-entries.push((key: l.type, label: layer-legend, color: fill-color, bandfill: fill-color, show-relu: false, opacity: layer-opacity))
       }
     }
   }
@@ -1796,18 +1807,7 @@ canvas(length: 1cm * scale-factor, {
     let legend-box-size = 0.3
     
     // Count total legend entries to calculate vertical centering
-    let ordered-types = ("input", "conv", "convres", "pool", "unpool", "deconv", "concat", "sum", "gap", "fc", "convsoftmax", "softmax", "output")
-    let entry-count = 0
-    for layer-type in ordered-types {
-      if layer-type in legend-entries {
-        entry-count += 1
-      }
-    }
-    for (key, entry) in legend-entries {
-      if key.starts-with("custom-") {
-        entry-count += 1
-      }
-    }
+    let entry-count = legend-entries.len()
     
     // Calculate total legend height: title + spacing + (entries * item-height)
     let legend-total-height = 0.5 + entry-count * legend-item-height
@@ -1821,62 +1821,31 @@ canvas(length: 1cm * scale-factor, {
     
     legend-y -= 0.6
     
-    for layer-type in ordered-types {
-      if layer-type in legend-entries {
-        let entry = legend-entries.at(layer-type)
-        let item-stroke = dynamic-color-strokes(entry.color)
-        let alpha = 100% - entry.at("opacity", default: 1.0) * 100%
-        
-        if entry.at("show-relu", default: false) {
-          // Draw split rectangle: 2/3 fill color (left), 1/3 bandfill color (right)
-          let split-x = legend-x + legend-box-size * 2 / 3
-          rect((legend-x, legend-y), (split-x, legend-y + legend-box-size),
-            fill: entry.color.transparentize(alpha), stroke: none)
-          rect((split-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: entry.bandfill.transparentize(alpha), stroke: none)
-          // Draw outline
-          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: none, stroke: item-stroke.solid)
-        } else {
-          // Draw solid rectangle
-          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
-        }
-        
-        content((legend-x + legend-box-size + 0.2, legend-y - 0.013 +legend-box-size / 2), anchor: "west",
-          [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
-        
-        legend-y -= legend-item-height
+    // Render all legend entries in order of appearance
+    for entry in legend-entries {
+      let item-stroke = dynamic-color-strokes(entry.color)
+      let alpha = 100% - entry.at("opacity", default: 1.0) * 100%
+      
+      if entry.at("show-relu", default: false) {
+        // Draw split rectangle: 2/3 fill color (left), 1/3 bandfill color (right)
+        let split-x = legend-x + legend-box-size * 2 / 3
+        rect((legend-x, legend-y), (split-x, legend-y + legend-box-size),
+          fill: entry.color.transparentize(alpha), stroke: none)
+        rect((split-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+          fill: entry.bandfill.transparentize(alpha), stroke: none)
+        // Draw outline
+        rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+          fill: none, stroke: item-stroke.solid)
+      } else {
+        // Draw solid rectangle
+        rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
+          fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
       }
-    }
-    
-    // Render custom legend entries
-    for (key, entry) in legend-entries {
-      if key.starts-with("custom-") {
-        let item-stroke = dynamic-color-strokes(entry.color)
-        let alpha = 100% - entry.at("opacity", default: 1.0) * 100%
-        
-        if entry.at("show-relu", default: false) {
-          // Draw split rectangle: 2/3 fill color (left), 1/3 bandfill color (right)
-          let split-x = legend-x + legend-box-size * 2 / 3
-          rect((legend-x, legend-y), (split-x, legend-y + legend-box-size),
-            fill: entry.color.transparentize(alpha), stroke: none)
-          rect((split-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: entry.bandfill.transparentize(alpha), stroke: none)
-          // Draw outline
-          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: none, stroke: item-stroke.solid)
-        } else {
-          // Draw solid rectangle
-          rect((legend-x, legend-y), (legend-x + legend-box-size, legend-y + legend-box-size),
-            fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
-        }
-        
-        content((legend-x + legend-box-size + 0.2, legend-y - 0.013 + legend-box-size / 2), anchor: "west",
-          [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
-        
-        legend-y -= legend-item-height
-      }
+      
+      content((legend-x + legend-box-size + 0.2, legend-y - 0.013 + legend-box-size / 2), anchor: "west",
+        [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
+      
+      legend-y -= legend-item-height
     }
   }
 })}
