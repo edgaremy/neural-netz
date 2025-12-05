@@ -6,7 +6,7 @@
   connections: (),
   palette: "warm",
   show-legend: false,
-  legend-title: "Layer Types",
+  legend-title: "Layers",
   scale: 100%,
   stroke-thickness: 1,
   depth-multiplier: 0.3,
@@ -1380,8 +1380,8 @@ canvas(length: 1cm * scale-factor, {
     
     // FULLY CONNECTED - delegates to custom with fc-specific defaults
     else if l.type == "fc" {
-      let h = l.at("height", default: 1.2)
-      let d = l.at("depth", default: 1.2)
+      let h = l.at("height", default: 3)
+      let d = l.at("depth", default: 0.4)
       let w = 0.2
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
@@ -1543,8 +1543,8 @@ canvas(length: 1cm * scale-factor, {
     
     // SOFTMAX / OUTPUT - delegates to custom with softmax/output-specific defaults
     else if l.type == "softmax" or l.type == "output" {
-      let h = l.at("height", default: 0.8)
-      let d = l.at("depth", default: 0.8)
+      let h = l.at("height", default: 3)
+      let d = l.at("depth", default: 0.4)
       let w = 0.2
       let label = l.at("label", default: if l.type == "softmax" { "Softmax" } else { "Output" })
       let name = l.at("name", default: none)
@@ -1791,7 +1791,7 @@ canvas(length: 1cm * scale-factor, {
   
   if show-legend {
     // Position legend after the last layer, accounting for its width and depth
-    let legend-x = prev-x + prev-depth-offset + 1.5
+    let legend-x = prev-x + prev-depth-offset + 1.0
     let legend-item-height = 0.4
     let legend-box-size = 0.3
     
@@ -1815,8 +1815,8 @@ canvas(length: 1cm * scale-factor, {
     // Center legend vertically around arrow-axis-y
     let legend-y = arrow-axis-y + legend-total-height / 2
     
-    content(((legend-x - 0.05), legend-y),
-      anchor: "west",
+    content((legend-x - 0.05, legend-y + 0.15),
+      anchor: "north-west",
       [#text(size: scaled-font(font-sizes.legend-title), weight: "bold", legend-title)])
     
     legend-y -= 0.6
@@ -1872,7 +1872,7 @@ canvas(length: 1cm * scale-factor, {
             fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
         }
         
-        content((legend-x + legend-box-size + 0.2, legend-y + legend-box-size / 2), anchor: "west",
+        content((legend-x + legend-box-size + 0.2, legend-y - 0.013 + legend-box-size / 2), anchor: "west",
           [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
         
         legend-y -= legend-item-height
