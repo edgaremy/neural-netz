@@ -6,6 +6,7 @@
   connections: (),
   palette: "warm",
   show-legend: false,
+  legend-title: "Layer Types",
   scale: 100%,
   stroke-thickness: 1,
   depth-multiplier: 0.3,
@@ -1809,13 +1810,14 @@ canvas(length: 1cm * scale-factor, {
     }
     
     // Calculate total legend height: title + spacing + (entries * item-height)
-    let legend-total-height = 0.6 + entry-count * legend-item-height
+    let legend-total-height = 0.5 + entry-count * legend-item-height
     
     // Center legend vertically around arrow-axis-y
     let legend-y = arrow-axis-y + legend-total-height / 2
     
-    content((legend-x, legend-y), 
-      [#h(20pt)#text(size: scaled-font(font-sizes.legend-title), weight: "bold", "Layer Types")])
+    content(((legend-x - 0.05), legend-y),
+      anchor: "west",
+      [#text(size: scaled-font(font-sizes.legend-title), weight: "bold", legend-title)])
     
     legend-y -= 0.6
     
@@ -1841,7 +1843,7 @@ canvas(length: 1cm * scale-factor, {
             fill: entry.color.transparentize(alpha), stroke: item-stroke.solid)
         }
         
-        content((legend-x + legend-box-size + 0.2, legend-y + legend-box-size / 2), anchor: "west",
+        content((legend-x + legend-box-size + 0.2, legend-y - 0.013 +legend-box-size / 2), anchor: "west",
           [#text(size: scaled-font(font-sizes.legend-item), entry.label)])
         
         legend-y -= legend-item-height
