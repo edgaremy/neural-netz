@@ -12,7 +12,6 @@
     label: "conv"
   ),(
     type: "pool",
-    channels: ("pool",),
     label: "pool",
     offset: 1
   ),(
@@ -22,7 +21,6 @@
     offset: 1
   ),(
     type: "unpool",
-    channels: ("unpool",),
     label: "unpool",
     offset: 1
   ),(
