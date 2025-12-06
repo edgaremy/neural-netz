@@ -684,6 +684,13 @@ canvas(length: 1cm * scale-factor, {
         let has-offset = l.at("offset", default: none) != none
         if not is-pool-or-unpool or has-offset {
           draw-segment-with-arrow(start-x, start-y, end-x, end-y, opacity: 0.7)
+          
+          // Draw connection label if specified (read from previous layer, like show-connection)
+          let conn-label = prev-layer.at("connection-label", default: none)
+          if conn-label != none {
+            content((mid-arrow-x, mid-arrow-y + 0.28), 
+              [#text(size: scaled-font(font-sizes.layer-label), conn-label)])
+          }
         }
       }
     }
@@ -707,6 +714,7 @@ canvas(length: 1cm * scale-factor, {
       let zlabel-val = l.at("zlabel", default: none)
       let layer-show-relu = l.at("show-relu", default: show-relu)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let img = l.at("image", default: none)
       let is-input-style = l.at("input-style", default: false)
       
@@ -910,6 +918,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.input)
       let layer-opacity = l.at("opacity", default: 0.9)
       let layer-show-connection = l.at("show-connection", default: false)
+      let connection-label = l.at("connection-label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       
@@ -996,6 +1005,7 @@ canvas(length: 1cm * scale-factor, {
       let zlabel-val = l.at("zlabel", default: none)
       let layer-show-relu = l.at("show-relu", default: show-relu)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let img = l.at("image", default: none)
       
       if img == "default" {
@@ -1151,6 +1161,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.pool)
       let layer-opacity = l.at("opacity", default: 0.75)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
@@ -1219,6 +1230,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.unpool)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let layer-opacity = l.at("opacity", default: 0.75)
       let label = l.at("label", default: none)
       let channels = l.at("channels", default: none)
@@ -1279,6 +1291,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.deconv)
       let layer-opacity = l.at("opacity", default: 0.7)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1331,6 +1344,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.concat)
       let layer-opacity = l.at("opacity", default: 0.7)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1383,6 +1397,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.gap)
       let layer-opacity = l.at("opacity", default: 0.7)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1435,6 +1450,7 @@ canvas(length: 1cm * scale-factor, {
       let fill-color = l.at("fill", default: colors.fc)
       let layer-opacity = l.at("opacity", default: 0.7)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let channels = l.at("channels", default: none)
       let img = l.at("image", default: none)
       let (ox, oy) = get-depth-offsets(d)
@@ -1483,6 +1499,7 @@ canvas(length: 1cm * scale-factor, {
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.sum)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let layer-opacity = l.at("opacity", default: 1.0)
       let channels = l.at("channels", default: none)
       
@@ -1553,6 +1570,7 @@ canvas(length: 1cm * scale-factor, {
       l.insert("depth", d)
       let w = l.at("width", default: 0.1)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.convsoftmax)
@@ -1607,6 +1625,7 @@ canvas(length: 1cm * scale-factor, {
       let label = l.at("label", default: if l.type == "softmax" { "Softmax" } else { "Output" })
       let name = l.at("name", default: none)
       let layer-show-connection = l.at("show-connection", default: true)
+      let connection-label = l.at("connection-label", default: none)
       let classes = l.at("classes", default: none)
       let channels = l.at("channels", default: none)
       let fill-color = l.at("fill", default: if l.type == "softmax" { colors.softmax } else { colors.output })
