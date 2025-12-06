@@ -15,7 +15,6 @@
     type: "pool",
     height: 6,
     depth: 6,
-    label: "pool1",
     channels: ("", 8),
   ),
   (
@@ -30,7 +29,6 @@
     type: "pool",
     height: 4,
     depth: 4,
-    label: "pool2",
     channels: ("", 4),
   ),
   (
@@ -45,7 +43,6 @@
     type: "pool",
     height: 1,
     depth: 1,
-    label: "pool3",
     channels: ("", 2),
   ),
   (

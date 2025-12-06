@@ -24,7 +24,6 @@
     type: "pool",
     height: 6,
     depth: 6,
-    label: "pool1",
   ),
   (
     type: "convres",
@@ -38,7 +37,6 @@
     type: "pool",
     height: 4,
     depth: 4,
-    label: "pool2",
   ),
   (
     type: "convres",
@@ -52,7 +50,6 @@
     type: "pool",
     height: 2,
     depth: 2,
-    label: "pool3",
   ),
   (
     type: "convres",
@@ -67,7 +64,6 @@
     type: "pool",
     height: 1,
     depth: 1,
-    label: "pool4",
   ),
   (
     type: "convres",
@@ -82,7 +78,6 @@
     type: "pool",
     height: 0.5,
     depth: 0.5,
-    label: "pool4",
   ),
   (
     type: "fc",
