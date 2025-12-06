@@ -602,6 +602,16 @@ canvas(length: 1cm * scale-factor, {
   for (i, l) in layers.enumerate() {
     used-layer-types.insert(l.type, true)
     
+    // Ensure height and depth are set for arrow calculation (using type-specific defaults)
+    if not l.keys().contains("height") {
+      let default-h = if l.type == "pool" or l.type == "unpool" { 4 } else if l.type == "concat" or l.type == "fc" or l.type == "softmax" or l.type == "output" { 3 } else if l.type == "gap" { 1.5 } else if l.type == "convsoftmax" { 4 } else { 5 }
+      l.insert("height", default-h)
+    }
+    if not l.keys().contains("depth") {
+      let default-d = if l.type == "pool" or l.type == "unpool" { 4 } else if l.type == "concat" { 3 } else if l.type == "gap" { 1.5 } else if l.type == "fc" or l.type == "softmax" or l.type == "output" { 0.4 } else if l.type == "convsoftmax" { 4 } else { 5 }
+      l.insert("depth", default-d)
+    }
+    
     let gap = if i == 0 {
       0
     } else if l.type == "pool" or l.type == "unpool" {
@@ -622,17 +632,26 @@ canvas(length: 1cm * scale-factor, {
         let start-x = prev-x + prev-pool-width + prev-depth-offset / 2
         let start-y = prev-center-y
         
-        let curr-h = l.at("height", default: 5)
-        let curr-d = l.at("depth", default: 5)
+        // Read height and depth directly from layer (already set by each layer type)
+        let curr-h = l.at("height")
+        let curr-d = l.at("depth")
         let (curr-ox, curr-oy) = get-depth-offsets(curr-d)
+        let curr-depth-offset = curr-ox
         let curr-y-offset = get-y-offset-for-center-on-axis(curr-h, curr-d, arrow-axis-y)
         let end-y = get-perspective-center-y(curr-y-offset, curr-h, curr-oy)
+        
         // Arrow ends at true_west of current layer (depth-adjusted)
-        // For pool/unpool with offset, calculate actual layer position first
-        let is-curr-pool-or-unpool = l.type == "pool" or l.type == "unpool"
-        let curr-offset = if is-curr-pool-or-unpool { l.at("offset", default: none) } else { none }
-        let curr-layer-x = if curr-offset != none { x + curr-offset } else if is-curr-pool-or-unpool { x + prev-depth-offset / 2 - curr-ox / 2 } else { x }
-        let end-x = curr-layer-x + curr-ox / 2
+        // Special handling for sum node (use radius instead of depth)
+        let end-x = if l.type == "sum" {
+          let radius = l.at("radius", default: 0.4)
+          x + prev-depth-offset / 2
+        } else {
+          // For pool/unpool with offset, calculate actual layer position first
+          let is-curr-pool-or-unpool = l.type == "pool" or l.type == "unpool"
+          let curr-offset = if is-curr-pool-or-unpool { l.at("offset", default: none) } else { none }
+          let curr-layer-x = if curr-offset != none { x + curr-offset } else if is-curr-pool-or-unpool { x + prev-depth-offset / 2 - curr-ox / 2 } else { x }
+          curr-layer-x + curr-depth-offset / 2
+        }
         
         let prev-name = prev-layer.at("name", default: none)
         let curr-name = l.at("name", default: none)
@@ -673,6 +692,8 @@ canvas(length: 1cm * scale-factor, {
     if l.type == "custom" {
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = l.at("width", default: none)
       let widths = l.at("widths", default: none)
       let label = l.at("label", default: none)
@@ -881,6 +902,8 @@ canvas(length: 1cm * scale-factor, {
       // But since we're in else-if, we need to inline the custom logic
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = l.at("width", default: 0)
       let label = l.at("label", default: none)
       let name = l.at("name", default: none)
@@ -963,6 +986,8 @@ canvas(length: 1cm * scale-factor, {
       let widths = l.at("widths", default: (1,))
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
+      l.insert("height", h)
+      l.insert("depth", d)
       let label = l.at("label", default: none)
       let xlabel = l.at("xlabel", default: none)
       let name = l.at("name", default: none)
@@ -1119,6 +1144,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "pool" {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = 0.1
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.pool)
@@ -1186,6 +1213,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "unpool" {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = 0.1
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.unpool)
@@ -1242,6 +1271,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "deconv" {
       let h = l.at("height", default: 5)
       let d = l.at("depth", default: 5)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = l.at("width", default: 0.3)
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
@@ -1292,6 +1323,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "concat" {
       let h = l.at("height", default: 3)
       let d = l.at("depth", default: 3)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = l.at("width", default: 0.15)
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
@@ -1342,6 +1375,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "gap" {
       let h = l.at("height", default: 1.5)
       let d = l.at("depth", default: 1.5)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = 0.3
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
@@ -1392,6 +1427,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "fc" {
       let h = l.at("height", default: 3)
       let d = l.at("depth", default: 0.4)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = 0.2
       let label = l.at("label", default: "")
       let name = l.at("name", default: none)
@@ -1441,7 +1478,8 @@ canvas(length: 1cm * scale-factor, {
     // SUM NODE - uses unique circle rendering (not box-based like custom)
     else if l.type == "sum" {
       let radius = l.at("radius", default: 0.4)
-      let label = l.at("label", default: "+")
+      let symbol = l.at("symbol", default: "+")
+      let label = l.at("label", default: none)
       let name = l.at("name", default: none)
       let fill-color = l.at("fill", default: colors.sum)
       let layer-show-connection = l.at("show-connection", default: true)
@@ -1465,16 +1503,22 @@ canvas(length: 1cm * scale-factor, {
         ),
         stroke: dyn-stroke.solid)
       
-      if label != none {
+      if symbol != none {
         let symbole-size = scaled-font(font-sizes.label * 2.5)
         content((center-x, center-y), 
-          [#v(-0.185 * symbole-size)#text(size: symbole-size, weight: "bold", fill: dyn-stroke.solid.paint, label)])
+          [#v(-0.185 * symbole-size)#text(size: symbole-size, weight: "bold", fill: dyn-stroke.solid.paint, symbol)])
       }
       
       // Display channels labels (below and optionally on diagonal)
       if channels != none {
         let (ox, oy) = get-depth-offsets(radius * 2)
         draw-channels-labels(channels, center-x, center-x + radius, center-y - radius, ox, oy)
+      }
+      
+      // Display label below the sum node
+      if label != none {
+        content((center-x, center-y - 1.5 * radius), 
+          [#text(size: scaled-font(font-sizes.label), weight: "bold", label)])
       }
       
       prev-x = center-x + radius
@@ -1505,6 +1549,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "convsoftmax" {
       let h = l.at("height", default: 4)
       let d = l.at("depth", default: 4)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = l.at("width", default: 0.1)
       let layer-show-connection = l.at("show-connection", default: true)
       let label = l.at("label", default: "")
@@ -1555,6 +1601,8 @@ canvas(length: 1cm * scale-factor, {
     else if l.type == "softmax" or l.type == "output" {
       let h = l.at("height", default: 3)
       let d = l.at("depth", default: 0.4)
+      l.insert("height", h)
+      l.insert("depth", d)
       let w = 0.2
       let label = l.at("label", default: if l.type == "softmax" { "Softmax" } else { "Output" })
       let name = l.at("name", default: none)
