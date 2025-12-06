@@ -3,10 +3,10 @@
 #set page(width: auto, height: auto, margin: 5mm)
 
 #draw-network((
-  (type: "conv", label: "A", name: "a"),
+  (type: "input", label: "A", name: "a", show-connection: true),
   (type: "conv", label: "B", name: "b", offset: 2),
   (type: "conv", label: "C", name: "c", offset: 2),
-  (type: "conv", label: "D", name: "d", offset: 2),
+  (type: "conv", label: "D", name: "d", offset: 2, show-connection: false),
   (type: "conv", label: "E", name: "e", offset: 2),
 ), connections: (
   (from: "a", to: "c", type: "skip", mode: "depth", label: "depth mode", pos: 6),

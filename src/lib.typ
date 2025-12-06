@@ -1807,7 +1807,7 @@ canvas(length: 1cm * scale-factor, {
           draw-connection-path(((from-anchor, waypoint1), (waypoint1, waypoint2), (waypoint2, to-anchor)), opacity: conn-opacity, layers: conn-layers, layer-positions-ref: layer-positions, show-relu: show-relu)
           
           if conn-label != none {
-            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, down-y - 0.2), 
+            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, down-y - 0.3), 
               [#text(size: scaled-font(font-sizes.layer-label), conn-label)])
           }
         } else if conn-mode == "depth" {
@@ -1827,7 +1827,7 @@ canvas(length: 1cm * scale-factor, {
           draw-connection-path(((from-anchor, waypoint1), (waypoint1, waypoint2), (waypoint2, to-anchor)), opacity: conn-opacity, layers: conn-layers, layer-positions-ref: layer-positions, show-relu: show-relu)
           
           if conn-label != none {
-            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, waypoint1.at(1) - 0.2), 
+            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, waypoint1.at(1) - 0.3), 
               [#text(size: scaled-font(font-sizes.layer-label), conn-label)])
           }
         } else if conn-mode == "air" {
@@ -1839,7 +1839,7 @@ canvas(length: 1cm * scale-factor, {
           draw-connection-path(((from-anchor, waypoint1), (waypoint1, waypoint2), (waypoint2, to-anchor)), opacity: conn-opacity, layers: conn-layers, layer-positions-ref: layer-positions, show-relu: show-relu)
           
           if conn-label != none {
-            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, up-y + 0.2), 
+            content(((waypoint1.at(0) + waypoint2.at(0)) / 2, up-y + 0.28), 
               [#text(size: scaled-font(font-sizes.layer-label), conn-label)])
           }
         }
