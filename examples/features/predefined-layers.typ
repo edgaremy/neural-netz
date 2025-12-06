@@ -50,7 +50,6 @@
   ),(
     type: "softmax",
     label: "softmax",
-    depth: 0.5,
     offset: 0.6
   ),(
     type: "output",
