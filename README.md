@@ -21,6 +21,7 @@ You can then call `draw-network` which has the following arguments:
   connections: (),
   palette: "warm",
   show-legend: false,
+  legend-title: "Layers Types",
   scale: 100%,
   stroke-thickness: 1,
   depth-multiplier: 0.3,
@@ -40,7 +41,7 @@ Here are a few simple features for getting started.
     (type: "input", image: "default"),
     (type: "conv", offset: 2), // Next layers are automatically connected with arrows
     (type: "conv", offset: 2),
-    (type: "pool"), // Pool layers are sticked to previous convolution block
+    (type: "pool"), // Pool layers are sticked to previous convolution block (by default))
     (type: "conv", widths: (1, 1), offset: 3) // you can offset layers
 ))
 ```
@@ -67,6 +68,7 @@ For the input type layer, you can also specify a custom image by giving `image: 
       channels: ("", "text also works"),
       height: 4,
       depth: 6,
+      connection-label: "connection label", // label of the connection to the NEXT layer
     ),(
       type: "conv",
       widths: (1.5, 1.5),
@@ -74,7 +76,7 @@ For the input type layer, you can also specify a custom image by giving `image: 
       depth: 3,
       label: "whole block label",
       legend: "CUSTOM NAME", // you can overwrite the default legend of predefined layers
-      offset: 3,
+      offset: 4,
     ),(
       type: "fc",
       channels: (10,),
@@ -96,16 +98,16 @@ Using `show-legend: true` you can add a smart legend to your visual !
 And if you network does not fit the page width of your Typst document, **you can reduce the scale by giving `scale: 50%` as argument of `draw-network`** (adjust the scale value to your need).
 
 
-### Adding other connexions
+### Adding other connections
 
-Though the main axis connections will be drawn automatically, you can specify other connexions to draw using the `connexions` argument of `draw-network`. In order to make reference to a layer, it will need a `name`:
+The main axis connections are drawn automatically, except for the input layer. You can overwrite that by using the boolean `show-connection` to tell if the connection **after** a layer should be drawn or not. You can also draw extra connections using the `connections` argument of `draw-network`. In order to make reference to a layer, it will need a `name`:
 
 ```typ
 #draw-network((
-  (type: "conv", label: "A", name: "a"),
+  (type: "input", label: "A", name: "a", show-connection: true),
   (type: "conv", label: "B", name: "b", offset: 2),
   (type: "conv", label: "C", name: "c", offset: 2),
-  (type: "conv", label: "D", name: "d", offset: 2),
+  (type: "conv", label: "D", name: "d", offset: 2, show-connection: false),
   (type: "conv", label: "E", name: "e", offset: 2),
 ), connections: (
   (from: "a", to: "c", type: "skip", mode: "depth", label: "depth mode", pos: 6),
@@ -117,7 +119,7 @@ show-relu: true // visualize relu using darker color on convolution layers
 )
 ```
 <p align="center">
-<img src="gallery/features/connexions.png" alt="Adding connexions example" width="500"/>
+<img src="gallery/features/connections.png" alt="Adding connections example" width="500"/>
 </p>
 
 ### Predefined layer types

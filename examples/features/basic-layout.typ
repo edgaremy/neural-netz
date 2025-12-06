@@ -6,6 +6,6 @@
     (type: "input", image: "default"),
     (type: "conv", offset: 2), // Next layers are automatically connected with arrows
     (type: "conv", offset: 2),
-    (type: "pool"), // Pool layers are sticked to previous convolution block
+    (type: "pool"), // Pool layers are sticked to previous convolution block (by default))
     (type: "conv", widths: (1, 1), offset: 3) // you can offset layers
 ))

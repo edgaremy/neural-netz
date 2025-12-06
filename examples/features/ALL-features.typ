@@ -6,7 +6,7 @@
     (type: "input", image: "default"),
     (type: "conv", offset: 2), // Next layers are automatically connected with arrows
     (type: "conv", offset: 2),
-    (type: "pool"), // Pool layers are sticked to previous convolution block
+    (type: "pool"), // Pool layers are sticked to previous convolution block (by default))
     (type: "conv", widths: (1, 1), offset: 3) // you can offset layers
 ))
 
@@ -23,6 +23,7 @@
       channels: ("", "text also works"),
       height: 4,
       depth: 6,
+      connection-label: "connection label", // label of the connection to the NEXT layer
     ),(
       type: "conv",
       widths: (1.5, 1.5),
@@ -30,7 +31,7 @@
       depth: 3,
       label: "whole block label",
       legend: "CUSTOM NAME", // you can overwrite the default legend of predefined layers
-      offset: 3,
+      offset: 4,
     ),(
       type: "fc",
       channels: (10,),
@@ -44,10 +45,10 @@ show-legend: true,
 )
 
 #draw-network((
-  (type: "conv", label: "A", name: "a"),
+  (type: "input", label: "A", name: "a", show-connection: true),
   (type: "conv", label: "B", name: "b", offset: 2),
   (type: "conv", label: "C", name: "c", offset: 2),
-  (type: "conv", label: "D", name: "d", offset: 2),
+  (type: "conv", label: "D", name: "d", offset: 2, show-connection: false),
   (type: "conv", label: "E", name: "e", offset: 2),
 ), connections: (
   (from: "a", to: "c", type: "skip", mode: "depth", label: "depth mode", pos: 6),

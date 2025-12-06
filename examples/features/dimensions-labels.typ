@@ -15,6 +15,7 @@
       channels: ("", "text also works"),
       height: 4,
       depth: 6,
+      connection-label: "connection label", // label of the connection to the NEXT layer
     ),(
       type: "conv",
       widths: (1.5, 1.5),
@@ -22,7 +23,7 @@
       depth: 3,
       label: "whole block label",
       legend: "CUSTOM NAME", // you can overwrite the default legend of predefined layers
-      offset: 3,
+      offset: 4,
     ),(
       type: "fc",
       channels: (10,),
