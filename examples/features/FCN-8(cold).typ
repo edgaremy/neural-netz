@@ -19,9 +19,9 @@
   // Upsampling path
   (type: "conv", channels: ("K", "I/32"), widths: (0.3,), height: 2.5, depth: 2.5, label: "fc8 to conv", name: "s32", offset: 0.8, show-relu: false),
   (type: "deconv", channels: ("K", "I/16"), height: 3.5, depth: 3.5, name: "up1", offset: 1),
-  (type: "sum", radius: 0.5, label: "+", name: "add1", offset: 1),
+  (type: "sum", radius: 0.5, symbol: "+", name: "add1", offset: 1),
   (type: "deconv", height: 5, depth: 5, channels: ("K", "I/8"), name: "up2", offset: 0.5),
-  (type: "sum", radius: 0.5, label: "+", name: "add2", offset: 1),
+  (type: "sum", radius: 0.5, symbol: "+", name: "add2", offset: 1),
   (type: "deconv", height: 8, depth: 8, channels: ("K",), label: "Deconv", name: "up3", offset: 0.5),
   (type: "convsoftmax", height: 8, depth: 8, channels: ("K", "I"), label: "softmax", offset: 1),
 ), connections: (

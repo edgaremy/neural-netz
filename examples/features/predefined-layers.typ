@@ -41,16 +41,17 @@
   ),(
     type: "convsoftmax",
     label: "convsoftmax",
-    offset: 0.7
+    offset: 0.6
   ),(
     type: "sum",
-    label: "+",
+    symbol: "+",
     channels: (""),
     offset: 0.7
   ),(
     type: "softmax",
     label: "softmax",
-    offset: 0.4
+    depth: 0.5,
+    offset: 0.6
   ),(
     type: "output",
     label: "output",
